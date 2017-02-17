@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.9.24)  15 FEB 2017 14:40
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.9.24)  17 FEB 2017 13:37
 entering extended mode
 **"./realios ir virtualios masinos projektas.tex"
 ("realios ir virtualios masinos projektas.tex"
@@ -542,23 +542,26 @@ Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
+("C:\Program Files\MiKTeX 2.9\tex\latex\tools\indentfirst.sty"
+Package: indentfirst 1995/11/23 v1.03 Indent first paragraph (DPC)
+)
 ("realios ir virtualios masinos projektas.aux")
 \openout1 = `"realios ir virtualios masinos projektas.aux"'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for L7x/lmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for L7x/lmr/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
 
 ("C:\Program Files\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -651,33 +654,34 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 \tf@toc=\write3
 \openout3 = `"realios ir virtualios masinos projektas.toc"'.
 
- [1]
-Overfull \hbox (3.07323pt too wide) in paragraph at lines 24--28
-\L7x/lmr/bx/n/12 Virtualios maði-nos \L7x/lmr/m/n/12 pro-ce-so-ri-aus ko-man-do
-s ope-ruoja su duomenimis, esanèi-
- []
-
-[2
+ [1] [2
 
 ] [3
 
-] [4] ("realios ir virtualios masinos projektas.aux") ) 
+] [4]
+[5]
+Overfull \hbox (17.25845pt too wide) in paragraph at lines 120--121
+[]\L7x/lmr/bx/n/12 Realios maði-nos at-mintis \L7x/lmr/m/n/12 - at-mintis esant
+i re-alioje maði-noje. Ji suskirstyta
+ []
+
+[6] ("realios ir virtualios masinos projektas.aux") ) 
 Here is how much of TeX's memory you used:
- 2301 strings out of 493334
- 30244 string characters out of 3139252
- 85957 words of memory out of 3000000
- 5790 multiletter control sequences out of 15000+200000
+ 2308 strings out of 493334
+ 30477 string characters out of 3139252
+ 86017 words of memory out of 3000000
+ 5793 multiletter control sequences out of 15000+200000
  26787 words of font info for 32 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 40i,4n,25p,781b,239s stack positions out of 5000i,500n,10000p,200000b,50000s
-{C:/Program Files/MiKTeX
- 2.9/fonts/enc/dvips/lm/lm-l7x.enc}<C:/Program Files/MiKTeX 2.9/fonts/type1/pub
-lic/lm/lmbx12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmr12.pfb>
-<C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmr17.pfb>
-Output written on "realios ir virtualios masinos projektas.pdf" (5 pages, 90510
- bytes).
+ 40i,4n,25p,779b,240s stack positions out of 5000i,500n,10000p,200000b,50000s
+{C:/Program Files/MiKTeX 2
+.9/fonts/enc/dvips/lm/lm-l7x.enc}<C:/Program Files/MiKTeX 2.9/fonts/type1/publi
+c/lm/lmbx12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmr12.pfb><C
+:/Program Files/MiKTeX 2.9/fonts/type1/public/lm/lmr17.pfb>
+Output written on "realios ir virtualios masinos projektas.pdf" (7 pages, 10005
+5 bytes).
 PDF statistics:
- 31 PDF objects out of 1000 (max. 8388607)
+ 39 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
