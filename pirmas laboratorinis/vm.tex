@@ -1,0 +1,65 @@
+\section{Virtualios mašinos modelis}
+	\subsection{Virtualios mašinos samprata}
+	\textbf{Virtuali mašina} - tai tarsi realios mašinos kopija. Virtuali mašina yra sudaryta iš realios mašinos komponenčių, tokių kaip procesorius, atmintis, įvedimo/išvedimo įrenginiai. Jiems yra suteikiama paprastesnė nei reali vartotojo sąsaja.
+	
+	\subsection{Virtualios mašinos loginiai komponentai}
+	\subsubsection{Virtualios mašinos atmintis}
+	Virtualiai mašinai skirta 16 blokų po 16 žodžių, vieno žodžio dydis yra 32 bitai.
+	
+	Vienas blokas yra skirtas virtualios mašinos stekui.
+	\subsubsection{Virtualios mašinos procesorius}
+	Virtualios mašinos registrai:
+	\begin{itemize}
+	\item Duomenų registras: 
+		\begin{itemize}
+		\item DR - Data Register. Dydis - 4 baitai. Naudojamas duomenų pakrovimui į jį iš atminties ir iš jo į atmintį. Taip pat gali būti naudojamas operacijose.
+		\end{itemize}
+	\item Segmentų registrai:
+		\begin{itemize}
+		\item CS - Code Segment. Rodyklė rodanti į kodo segmentą atmintyje.
+		\item DS - Data Segment. Rodyklė rodanti į duomenų segmentą atmintyje.
+		\item ST - Stack Segment. Rodyklė rodanti į steko segmentą atmintyje.
+		\end{itemize}
+	\item Nuorodų registrai:
+		\begin{itemize}
+		\item PC - Program Counter. Saugoma einamosios komandos žodžio indeksas.
+		\item SP - Stack Pointer. Saugomas steko viršūnės žodžio indeksas.
+		\end{itemize}
+	\item Loginiai registrai:
+		\begin{itemize}
+		\item SF - Status Flag. Rodo procesoriaus būseną po aritmetinio veiksmo.
+		\end{itemize}
+	\end{itemize}
+	\subsubsection{Virtualios mašinos komandų sistema}
+	Vieną komandą sudaro 4 baitai, tačiau nebūtinai visi baita privalo būti naudojami.
+	\begin{itemize}
+	\item Aritmetinės komandos
+		\begin{itemize}
+		\item ADD - sudeda du viršutinius steko elementus, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą į steką.
+		\item SUB - atima viršutinį teko elementą iš prieš paskutinio steko elemento, sumažina steko viršūnės rodyklę vienetu ir įdeda rezultatą į steką.
+		\item MUL - sudaugina du viršutinius teko elementus, sumažina steko viršūnės rodyklę vienetu ir įdeda rezultatą į steką.
+		\item DIV - padalina antrą nuo viršaus steko elementą iš višutinio steko elemento, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
+		\end{itemize}
+	\item Loginės komandos
+		\begin{itemize}
+		\item AND - įvykdo AND operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
+		\item OR - įvykdo OR operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
+		\item XOR - įvykdo XOR operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
+		\item NOT - įvykdo NOT operaciją viršutiniam steko elementui, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
+		\end{itemize}
+	\item Palyginimo komandos
+		\begin{itemize}
+		\item CMP - palygina du viršutinius steko elementus ir nustato SF. Jei elementai lygūs, tada SF = 0. Jei višutinis elementas didesnis, tada SF = 1. Jei viršutinis elementas mažesnis, tada SF = 2.
+		\end{itemize}
+	\item Darbo su duomenimis komandos
+		\begin{itemize}
+		\item LWxy - į DR įdedamas žodis esantis duomenų segmente adresu 10 * x + y.
+		\item SWxy - į duomenų segmentą, adresu 10 * x + y įdedama DR reikšmė.
+		\end{itemize}
+	\item Darbo su steku komandos
+		\begin{itemize}
+		\item PUSH - steko viršūnės rodyklė padidinama vientu ir į steko viršūnę idedama DR reikšmė.
+		\item POP - į DR įdedamas žodis esantis steko viršūnėje ir steko virūnės rodyklė sumažinama vienetu.
+		\end{itemize}
+		
+	\end{itemize}
