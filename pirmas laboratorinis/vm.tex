@@ -9,7 +9,7 @@
 	Vienas blokas yra skirtas virtualios mašinos stekui.
 	\subsubsection{Virtualios mašinos procesorius}
 	Virtualios mašinos registrai:
-	\begin{itemize}
+	\begin{enumerate}
 	\item Duomenų registras: 
 		\begin{itemize}
 		\item DR - Data Register. Dydis - 4 baitai. Naudojamas duomenų pakrovimui į jį iš atminties ir iš jo į atmintį. Taip pat gali būti naudojamas operacijose.
@@ -29,10 +29,10 @@
 		\begin{itemize}
 		\item SF - Status Flag. Rodo procesoriaus būseną po aritmetinio veiksmo.
 		\end{itemize}
-	\end{itemize}
+	\end{enumerate}
 	\subsubsection{Virtualios mašinos komandų sistema}
 	Vieną komandą sudaro 4 baitai, tačiau nebūtinai visi baita privalo būti naudojami.
-	\begin{itemize}
+	\begin{enumerate}
 	\item Aritmetinės komandos
 		\begin{itemize}
 		\item ADD - sudeda du viršutinius steko elementus, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą į steką.
@@ -61,5 +61,11 @@
 		\item PUSH - steko viršūnės rodyklė padidinama vientu ir į steko viršūnę idedama DR reikšmė.
 		\item POP - į DR įdedamas žodis esantis steko viršūnėje ir steko virūnės rodyklė sumažinama vienetu.
 		\end{itemize}
-		
-	\end{itemize}
+	\item Valdymo perdavimo komandos
+		\begin{itemize}
+		\item JMxy - besąlyginio valdymo perdavimo komanda. Valdymas perduodamas kodo segmento žodžiui 10 * x + y, t.y. PC = 10 * x + y.
+		\item JExy - sąlyginio valdymo perdavimo komanda. Jei SF = 0(elementai yra lygūs), tada valdymas perduodamas kodo segmento žodžiui 10 * x + y.
+		\item JHxy - sąlyginio valdymo perdavimo komanda. Jei SF = 1(virūnės elementas yra didesnis), tada valdymas perduodamas kodo segmento žodžiui 10 * x + y.
+		\item JLxy  - sąlyginio valdymo perdavimo komanda. Jei SF = 2(viršūnės elementas yra mažesnis), tada valdymas perduodamas kodo segmento žodžiui 10 * x + y.
+		\end{itemize}
+	\end{enumerate}
