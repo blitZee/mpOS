@@ -70,7 +70,10 @@
 	Vortotojo rėžimu programa gali vykti kelios programos vienu metu, po kiekvieno veiksmo taimeris mažinamas ir kai jis pasiekia nulį, toliau procesoriaus darbą nustato prioritetų automatas. Prieinama atmintis yra tik ta, kurią išskyrė procesorius.
 	
 	\subsection{Puslapių transliacija}
+	Puslapių transliavimo mechanizmas naudojamas, tam, kad galėtumę susieti virtualią ir realią atmintis. registre PTR bus laikomas puslapiavimo lentelės bloko adresas, kurio kiekviename žodyje bus laikomas virtualios mašinos puslapio takelio adresas. 
+	\(a_0\) ir \(a_1\) naudojami naudojamas gauti puslapių leneltės adresą, naudojama formulė yra tokia:\\ \(10 * a_0 + a_1\)
 	
+	Dviženklis adresas \(x_0\), \(x_1\) realiojoje mašinoje apskaičiuojamas taip:\\ \(10 * [10 *(10 * a_0 + a_1) + x_0] + x_1\)  
 	\subsection{Swapingas}
 	Kai steke pritrūksta vietos, dalis steko turinio yra perkeliamas į išorinę atmintį.
 	

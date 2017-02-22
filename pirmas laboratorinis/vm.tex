@@ -10,9 +10,10 @@
 	\subsubsection{Virtualios mašinos procesorius}
 	Virtualios mašinos registrai:
 	\begin{enumerate}
-	\item Duomenų registras: 
+	\item Duomenų registrai: 
 		\begin{itemize}
-		\item DR - Data Register. Dydis - 4 baitai. Naudojamas duomenų pakrovimui į jį iš atminties ir iš jo į atmintį. Taip pat gali būti naudojamas operacijose.
+		\item DR1 - Data Register. Dydis - 4 baitai. Naudojamas duomenų pakrovimui į jį iš atminties ir iš jo į atmintį. Taip pat gali būti naudojamas operacijose.
+		\item DR2 - Data Register. Dydis - 4 baitai. Naudojamas duomenų pakrovimui į jį iš atminties ir iš jo į atmintį. Taip pat gali būti naudojamas operacijose.
 		\end{itemize}
 	\item Segmentų registrai:
 		\begin{itemize}
@@ -22,7 +23,7 @@
 		\end{itemize}
 	\item Nuorodų registrai:
 		\begin{itemize}
-		\item PC - Program Counter. Saugoma einamosios komandos žodžio indeksas.
+		\item IC - Instruction Counter. Saugoma einamosios komandos žodžio indeksas.
 		\item SP - Stack Pointer. Saugomas steko viršūnės žodžio indeksas.
 		\end{itemize}
 	\item Loginiai registrai:
@@ -35,37 +36,46 @@
 	\begin{enumerate}
 	\item Aritmetinės komandos
 		\begin{itemize}
-		\item ADD - sudeda du viršutinius steko elementus, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą į steką.
-		\item SUB - atima viršutinį teko elementą iš prieš paskutinio steko elemento, sumažina steko viršūnės rodyklę vienetu ir įdeda rezultatą į steką.
-		\item MUL - sudaugina du viršutinius teko elementus, sumažina steko viršūnės rodyklę vienetu ir įdeda rezultatą į steką.
-		\item DIV - padalina antrą nuo viršaus steko elementą iš višutinio steko elemento, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
+		\item ADD - sudeda du viršutinius steko elementus, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą į steką. Gali pakeisti visus flag'us.
+		\item SUB - atima viršutinį teko elementą iš prieš paskutinio steko elemento, sumažina steko viršūnės rodyklę vienetu ir įdeda rezultatą į steką. Gali pakeisti visus flag'us.
+		\item MUL - sudaugina du viršutinius teko elementus, sumažina steko viršūnės rodyklę vienetu ir įdeda rezultatą į steką. Gali pakeisti visus flag'us.
+		\item DIV - padalina antrą nuo viršaus steko elementą iš višutinio steko elemento, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti visus flag'us.
 		\end{itemize}
 	\item Loginės komandos
 		\begin{itemize}
-		\item AND - įvykdo AND operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
-		\item OR - įvykdo OR operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
-		\item XOR - įvykdo XOR operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
-		\item NOT - įvykdo NOT operaciją viršutiniam steko elementui, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą.
+		\item AND - įvykdo AND operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti ZF.
+		\item OR - įvykdo OR operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti ZF.
+		\item XOR - įvykdo XOR operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti ZF.
+		\item NOT - įvykdo NOT operaciją viršutiniam steko elementui, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti ZF.
 		\end{itemize}
 	\item Palyginimo komandos
 		\begin{itemize}
-		\item CMP - palygina du viršutinius steko elementus ir nustato SF. Jei elementai lygūs, tada SF = 0. Jei višutinis elementas didesnis, tada SF = 1. Jei viršutinis elementas mažesnis, tada SF = 2.
+		\item CMP - palygina du viršutinius steko elementus ir nustato SF. Jei elementai lygūs, tada ZF = 1. Jei višutinis elementas didesnis, tada CF = 0 ir  ZF = 0. Jei viršutinis elementas mažesnis, CF = 1.
 		\end{itemize}
 	\item Darbo su duomenimis komandos
 		\begin{itemize}
-		\item LWxy - į DR įdedamas žodis esantis duomenų segmente adresu 10 * x + y.
-		\item SWxy - į duomenų segmentą, adresu 10 * x + y įdedama DR reikšmė.
+		\item LWxy - į DR1 įdedamas žodis esantis duomenų segmente adresu 10 * x + y.
+		\item SWxy - į duomenų segmentą, adresu 10 * x + y įdedama DR1 reikšmė.
 		\end{itemize}
 	\item Darbo su steku komandos
 		\begin{itemize}
-		\item PUSH - steko viršūnės rodyklė padidinama vientu ir į steko viršūnę idedama DR reikšmė.
-		\item POP - į DR įdedamas žodis esantis steko viršūnėje ir steko virūnės rodyklė sumažinama vienetu.
+		\item PUSH - steko viršūnės rodyklė padidinama vientu ir į steko viršūnę idedama DR1 reikšmė.
+		\item POP - į DR1 įdedamas žodis esantis steko viršūnėje ir steko virūnės rodyklė sumažinama vienetu.
 		\end{itemize}
 	\item Valdymo perdavimo komandos
 		\begin{itemize}
 		\item JMxy - besąlyginio valdymo perdavimo komanda. Valdymas perduodamas kodo segmento žodžiui 10 * x + y, t.y. PC = 10 * x + y.
-		\item JExy - sąlyginio valdymo perdavimo komanda. Jei SF = 0(elementai yra lygūs), tada valdymas perduodamas kodo segmento žodžiui 10 * x + y.
-		\item JHxy - sąlyginio valdymo perdavimo komanda. Jei SF = 1(virūnės elementas yra didesnis), tada valdymas perduodamas kodo segmento žodžiui 10 * x + y.
-		\item JLxy  - sąlyginio valdymo perdavimo komanda. Jei SF = 2(viršūnės elementas yra mažesnis), tada valdymas perduodamas kodo segmento žodžiui 10 * x + y.
+		\item JExy - sąlyginio valdymo perdavimo komanda. Jei ZF = 1 (elementai yra lygūs), tada valdymas perduodamas kodo segmento žodžiui 10 * x + y.
+		\item JAxy - sąlyginio valdymo perdavimo komanda. Jei CF = 0 ir ZF = 0 (virūnės elementas yra didesnis), tada valdymas perduodamas kodo segmento žodžiui 10 * x + y.
+		\item JLxy  - sąlyginio valdymo perdavimo komanda. Jei CF = 1 (viršūnės elementas yra mažesnis), tada valdymas perduodamas kodo segmento žodžiui 10 * x + y.
+		\end{itemize}
+	\item Failų rašymo, skaitymo komandos
+		\begin{itemize}
+		\item FR - DR1 registre bus saugoma į kurią vietą duomenų segmente įdėti įvestus duomenis.
+		\item FW - DR1 registre bus saugoma kokio ilgio eilutė bus įrašyta į failą. DR2 registre bus saugomas žinutės adresas.
+		\end{itemize}
+	\item Darbo pabaigos komanda
+		\begin{itemize}
+		\item HALT - parodo programos pabaigą.
 		\end{itemize}
 	\end{enumerate}
