@@ -1,4 +1,6 @@
 \section{Virtualios mašinos modelis}
+	\subsection{Virtualios mašinos schema}
+	\includegraphics{VM.png}
 	\subsection{Virtualios mašinos samprata}
 	\textbf{Virtuali mašina} - tai tarsi realios mašinos kopija. Virtuali mašina yra sudaryta iš realios mašinos komponenčių, tokių kaip procesorius, atmintis, įvedimo/išvedimo įrenginiai. Jiems yra suteikiama paprastesnė nei reali vartotojo sąsaja.
 	
@@ -56,6 +58,8 @@
 		\begin{itemize}
 		\item LWxy - į DR1 įdedamas žodis esantis duomenų segmente adresu 10 * x + y.
 		\item SWxy - į duomenų segmentą, adresu 10 * x + y įdedama DR1 reikšmė.
+		\item PRNT - iškviečiamas pertraukimas, spausdinantis eilutę į ekraną. Eilutės adresas nurodytas steko viršūnėje, eilutės ilgis nurodytas registre DR1
+		\item PRNS - iškviečiamas pertraukimas, spausdinantis steko viršūnę kaip skaičių į ekraną.
 		\end{itemize}
 	\item Darbo su steku komandos
 		\begin{itemize}
@@ -79,3 +83,12 @@
 		\item HALT - parodo programos pabaigą.
 		\end{itemize}
 	\end{enumerate}
+	Kodo struktūra turi būti tokia:\\
+	DATASEG\\
+	...\\
+	CODESEG\\
+	...\\
+	HALT\\
+	\\
+	DATASEG viduje galima įdėti duomenis į duomenų segmentą naudojant DW komandą.
+\clearpage
