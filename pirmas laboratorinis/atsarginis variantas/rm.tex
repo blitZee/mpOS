@@ -22,10 +22,9 @@
 	\item R1, R2 - bendros paskirties registrai. Dydis - po 4 baitus. Skirti atlikti komandoms.
 	\item Kanalų registrai. Dydis - po 1 baitą.
 	\begin{itemize}
-		\item CH1 - registras rodantis ar yra atliekamas persiuntimas iš išorinės atminties į realią atmintį.
-		\item CH2 - registras rodantis ar yra atliekamas persiuntimas iš realios atminties į išorinę atmintį.
-		\item CH3 - registras rodantis ar atliekamas įvedimas iš klaviatūros.
-		\item CH4 - registras rodantis ar atliekamas išvedimas į ekraną.
+		\item CH1 - registras rodantis ar yra atliekamas persiuntimas iš išorinės atminties į realią atmintį arba atvirkščiai.
+		\item CH2 - registras rodantis ar atliekamas įvedimas iš klaviatūros.
+		\item CH3 - registras rodantis ar atliekamas išvedimas į ekraną.
 	\end{itemize}
 	\item SI - supervizoriaus pertraukimų registras. Dydis - 1 baitas. 
 	\item PI - programinių pertraukimų registras. Dydis - 1 baitas.
@@ -44,9 +43,8 @@
 	Pertraukimai pagal SI registro reikšmę:
 	\begin{itemize}
 	\item 0 - jokio pertraukimo.
-	\item 1 - Full stack. Kyla, kai SP reikšmė tampa F. Naudojama swapingo mechanizmui.
-	\item 2 - Empty stack. Kyla, kai stekas tampa tuščiu. Naudojama swapingo mechanizmui.
-	\item 3 - HALT. Programa baigė darbą. 
+	\item 1 - taimerio pertraukimas.
+	\item 2 - HALT. Programa baigė darbą. 
 	\end{itemize}
 	
 	\subsection{Programiniai pertraukimai}
@@ -57,9 +55,7 @@
 	\item 0 - jokio pertraukimo.
 	\item 1 - Undefined operation code. Neteisingas operacijos kodas.
 	\item 2 - Undefined address. Neteisingas adresas.
-	\item 3 - Incorrect assignment. Neteisingas priskyrimas.
-	\item 4 - Input. Įvedimas iš klaviatūros.
-	\item 5 - Output. Išvedimas į ekraną.
+	\item 3 - Division by zero. Dalyba iš nulio.
 	\end{itemize}
 	
 	\subsection{Realios mašinos rėžimai}
@@ -74,12 +70,6 @@
 	\(a_0\) ir \(a_1\) naudojami naudojamas gauti puslapių leneltės adresą, naudojama formulė yra tokia:\\ \(10 * a_0 + a_1\)
 	
 	Dviženklis adresas \(x_0\), \(x_1\) realiojoje mašinoje apskaičiuojamas taip:\\ \(10 * [10 *(10 * a_0 + a_1) + x_0] + x_1\)  
-	\subsection{Swapingas}
-	Kai steke pritrūksta vietos, dalis steko turinio yra perkeliamas į išorinę atmintį.
-	
-	Kai stekas tampa tuščias, į jį grąžinami duomenys iš išorinės atminties, jei jų yra.
-	
-	Kiekvienai programai yra sukuriamas laikinas failas, kur ir bus dedamas stekas, jei to prireiks. Programai pasibaigus šis failas bus ištrinamas.
 	
 	\subsection{Įvedimas ir išvedimas}
 	Kadangi projektuojama OS yra interaktyvi, vartotojas gali įvesti komandas ir/ar duomenis ir taip reguliuoti realios mašinos darbą ir matyti šių komandų rezultatus.
@@ -89,7 +79,7 @@
 	Išvedimo įrenginys - ekranas. Įvykdytų komandų rezultatai gali būti išvedami į ekraną.
 	
 	\subsection{Atminties įrenginiai}
-	\textbf{Išorinė atmintis} - kietasis diskas. Jame duomenys bus išsaugoti net ir išjungus realią mašiną.
+	\textbf{Išorinė atmintis} - kietasis diskas. Jame duomenys bus išsaugoti net ir išjungus realią mašiną. 
 	
 	\textbf{Realios mašinos atmintis} - atmintis esanti realioje mašinoje. Ji suskirstyta į 16 blokų po 16 žodžių, vieno žodžio dydis yra 32 bitai. Ją toliau skirstome į supervizorinę ir vartotojo atmintį:
 	\begin{itemize}
@@ -98,5 +88,16 @@
 	\end{itemize}
 	
 	\subsection{Išorinė atmintis}
-	Išorinė atmintis bus realizuojama failu kietajame diske. Darbą su ja vykdys HLP.
+	Išorinė atmintis bus realizuojama failu kietajame diske. Darbą su ja vykdys HLP.\\
+	Išorinė atmintis yra 256 blokai po 16 takelių po 16 žodžių po 4 baitus, t.y. 262144 baitų. \\
+	Pirmojo bloko struktūra:\\ 
+	Šis blokas yra skirtas aprašyti kokioms programoms yra duoti kiti blokai. Pirmasis žodis aprašo programą esančią pirmąjame bloke, antrasis - antrajame ir t.t. Vieno žodžio struktūra: \(x_1x_2x_3x_4\)\\
+	\(x_1x_2\) yra skirti failo pavadinimui, \(x_3\) yra skirtas nusakyti, ar failas atidarytas, ar ne(0 jei neatidarytas, 1, jei atidarytas), o \(x_4\) yra skirti nusakyti kelinta išskaidyto failo dalis tai yra.\\
+	Kitų blokų struktūra:
+	\begin{itemize}
+	\item Pirmasis žodis yra specialus ženklas susidedantis iš keturių dolerių(\$\$\$\$).%subject to change
+	\item Antrasis žodis yra toks pat, kaip ir šį bloką aprašantis žodis, esantis pimajame bloke.%Tikėkimes neužmiršima wtf is this.
+	(Pvz: Jei esame trečiajame bloke, tada šio bloko antrasis žodis sutampa su pirmojo bloko trečiuoju).
+	\item Visi kiti žodžiai skirti duomenims.
+	\end{itemize}
 \clearpage
