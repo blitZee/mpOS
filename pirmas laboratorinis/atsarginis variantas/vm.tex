@@ -38,28 +38,34 @@
 	\begin{enumerate}
 	\item Aritmetinės komandos
 		\begin{itemize}
-		\item ADD - sudeda du viršutinius steko elementus, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą į steką. Gali pakeisti visus flag'us.
-		\item SUB - atima viršutinį teko elementą iš prieš paskutinio steko elemento, sumažina steko viršūnės rodyklę vienetu ir įdeda rezultatą į steką. Gali pakeisti visus flag'us.
-		\item MUL - sudaugina du viršutinius teko elementus, sumažina steko viršūnės rodyklę vienetu ir įdeda rezultatą į steką. Gali pakeisti visus flag'us.
-		\item DIV - padalina antrą nuo viršaus steko elementą iš višutinio steko elemento, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti visus flag'us.
+		\item ADRR - sudeda registrus DR1 ir DR2. Rezultatas laikomas registre R1. Gali pakeisti visus flag'us.
+		\item ADxy - sudeda registrą DR1 ir žodį esantį duomenų segmente adresu 10*x + y. Rezultatas laikomas registre DR1. Gali paskeisti visus flag'us.
+		\item SBRR - atema DR2 reikšmę iš DR1. Rezultatas laikomas registre R1. Gali pakeisti visus flag'us.
+		\item SBxy - atema žodį esantį duomenų segmente adresu 10*x + y iš registro DR1. Rezultatas laikomas registre DR1. Gali pakeisti visus flag'us.
+		\item MLRR - sudaugina registrus DR1 ir DR2. Rezultatas laikomas registre DR1. Gali pakeisti visus flag'us.
+		\item MLxy - sudaugina registrą DR1 iš žodžio esančio duomenų segmente adresu 10*x + y. Gali pakeisti visus flag'us.
+		\item DVRR - padalina DR1 iš DR2. Dalybos rezultatas laikomas registre DR1, modulio rezultatas laikomas registre DR2. Gali pakeisti visus flag'us.
+		\item DVxy - padalina DR1 iš žodžio esančio duomenų segmente adresu 10*x - y.
 		\end{itemize}
 	\item Loginės komandos
 		\begin{itemize}
-		\item AND - įvykdo AND operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti ZF.
-		\item OR - įvykdo OR operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti ZF.
-		\item XOR - įvykdo XOR operaciją tarp viršutinių steko elementų, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti ZF.
-		\item NOT - įvykdo NOT operaciją viršutiniam steko elementui, sumažina steko virūnės rodyklę vienetu ir įdeda rezultatą. Gali pakeisti ZF.
+		\item AND - įvykdo AND operaciją tarp DR1 ir DR2. Rezultatas laikomas registre R1. Gali pakeisti ZF.
+		\item OR - įvykdo OR operaciją tarp DR1 ir DR2. Rezultatas laikomas registre DR1. Gali pakeisti ZF.
+		\item XOR - įvykdo XOR operaciją tarp DR1 ir DR2. Rezultatas laikomas registre DR1. Gali pakeisti ZF.
+		\item NOT - įvykdo NOT operaciją DR1 registrui. Rezultatas laikomas registre DR1. Gali pakeisti ZF.
 		\end{itemize}
 	\item Palyginimo komandos
 		\begin{itemize}
-		\item CMP - palygina du viršutinius steko elementus ir nustato SF. Jei elementai lygūs, tada ZF = 1. Jei višutinis elementas didesnis, tada CF = 0 ir  ZF = 0. Jei viršutinis elementas mažesnis, CF = 1.
+		\item CMP - palygina registrus DR1 ir DR2. Jei elementai lygūs, tada ZF = 1. Jei višutinis elementas didesnis, tada CF = 0 ir  ZF = 0. Jei viršutinis elementas mažesnis, CF = 1.
 		\end{itemize}
 	\item Darbo su duomenimis komandos
 		\begin{itemize}
 		\item LWxy - į DR1 įdedamas žodis esantis duomenų segmente adresu 10 * x + y.
 		\item SWxy - į duomenų segmentą, adresu 10 * x + y įdedama DR1 reikšmė.
-		\item PRNT - iškviečiamas pertraukimas, spausdinantis eilutę į ekraną. Eilutės adresas nurodytas steko viršūnėje, eilutės ilgis nurodytas registre DR1
-		\item PRNS - iškviečiamas pertraukimas, spausdinantis steko viršūnę kaip skaičių į ekraną.
+		\item MOV1 - į DR2 įdedama DR1 reikšmė.
+		\item MOV2 - į DR1 įdedama DR2 reikšmė.
+		\item PRNT - iškviečiamas pertraukimas, spausdinantis eilutę į ekraną. Eilutės adresas nurodytas registre DR1 viršūnėje, eilutės ilgis nurodytas registre DR2
+		\item PRNS - iškviečiamas pertraukimas, DR1 reikšmę kaip skaičių į ekraną.
 		\end{itemize}
 	\item Darbo su steku komandos
 		\begin{itemize}
@@ -75,8 +81,11 @@
 		\end{itemize}
 	\item Failų rašymo, skaitymo komandos
 		\begin{itemize}
-		\item FR - DR1 registre bus saugoma į kurią vietą duomenų segmente įdėti įvestus duomenis.
-		\item FW - DR1 registre bus saugoma kokio ilgio eilutė bus įrašyta į failą. DR2 registre bus saugomas žinutės adresas.
+		\item FOxy - Atidaromas failas esantis kietajame diske, failo pavadinimas yra xy. Failo handleris yra grąžinamas į DR1.
+		\item FC - Uždaromas failas, DR1 yra šio failo handleris.
+		\item FD - Ištrinamas failas, DR1 yra šio failo handleris.
+		\item FRxy - DR1 yra failo handleris. 10*x + y nurodo vietą, į kurią rašysim duomenų segmente. DR2 nurodo adresą iš kurio skaitysim.
+		\item FWxy - DR1 yra failo handleris. 10*x + y nurodo vietą, iš kurios rašysim iš duomenų segmento, DR2 nurodo adresą, kur įrašysim į failą.
 		\end{itemize}
 	\item Darbo pabaigos komanda
 		\begin{itemize}
