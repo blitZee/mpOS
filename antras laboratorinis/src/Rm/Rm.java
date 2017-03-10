@@ -9,7 +9,6 @@ import java.io.FileReader;
  * Created by blitZ on 3/8/2017.
  */
 public class Rm {
-
     RmRegister mode;
     RmRegister ptr;
     RmRegister sp;
@@ -22,6 +21,7 @@ public class Rm {
     RmInterrupt si;
     RmInterrupt pi;
 
+    public HDD hdd;
     Memory memory;
 
     public RmStatusFlag sf;
@@ -43,6 +43,7 @@ public class Rm {
         sf = new RmStatusFlag();
         ic = 0;
         ti = 10;
+        hdd = new HDD();
         memory = new Memory(this);
     }
 
@@ -66,14 +67,14 @@ public class Rm {
 
                         if (counter >= 15) { //Jei counter reiksme pasiekia bloko dydi, ji yra nunulinama ir blokas pridedamas
                             //i supervizoriaus atminti
-                            memory.addToSupervisor(block, false);
+                            memory.addToSupervisor(block, false, programName);
                             counter = 0;
                             block = new byte[16][4];
                         }
                     }
                 }
             }
-            memory.addToSupervisor(block, false);
+            memory.addToSupervisor(block, false, programName);
             block = new byte[16][4];
 
             if (buffer.equals("CSEG")){// Pabaigus DSEG, pereinam prie CSEG.
@@ -90,12 +91,12 @@ public class Rm {
 
                     if (counter > 15) { //Jei counter reiksme pasiekia bloko dydi, ji yra nunulinama ir blokas pridedamas
                         //i supervizoriaus atminti
-                        memory.addToSupervisor(block, true);
+                        memory.addToSupervisor(block, true, programName);
                         counter = 0;
                         block = new byte[16][4];
                     }
                 }
-                memory.addToSupervisor(block, true);
+                memory.addToSupervisor(block, true, programName);
             }
 
         }

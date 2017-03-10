@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import Rm.Rm;
@@ -19,6 +20,11 @@ public class main {
             System.out.println(inArray[0]);
             switch(inArray[0].toLowerCase()){
                 case "quit": {
+                    try {
+                        rm.hdd.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     work = false;
                     break;
                 }
