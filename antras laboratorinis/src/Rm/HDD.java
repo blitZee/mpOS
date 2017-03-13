@@ -32,7 +32,6 @@ public class HDD implements Closeable {
 
     public void writeToDisk(String name, byte[][] block, int len) throws IOException {
         byte[] bName;
-        long temp = 0;
         bName = name.getBytes();
         file.seek(0);// always go to the beginning of file and read from there
         try {
@@ -65,6 +64,9 @@ public class HDD implements Closeable {
         // now just write the content of block
         for(int i = 0; i < len; i++){
             file.write(block[i]);
+            /*if(i == 15)
+                file.writeByte(10);
+            else*/
             file.writeByte(32);
         }
     }

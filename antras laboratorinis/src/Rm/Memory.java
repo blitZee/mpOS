@@ -21,13 +21,16 @@ public class Memory {
     public void addToSupervisor(byte[][] block, boolean isCode, String name) throws IOException {
         memory[0] = block;
         int len = parse(isCode);
-        hdd.writeToDisk(name, memory[0], len);
+        hdd.writeToDisk(name, memory[0], 16);
+    //TODO: do we write to HDD only using blocks or can we write less than that? if only using blocks then everything is
+    // TODO fine, if not then instead of hardcoding 16 in line 24 of this file we should use "len" variable and uncomment
+    // TODO some code in HDD.java, lines 67 - 69
         /*for(int i = 0; i < block.length; i++) {
             for (int j = 0; j < block[i].length; j++)
                 System.out.print((char)block[i][j]);
             System.out.println();
         }*/
-    }
+}
 
     private int parse(boolean isCode) {
         if (isCode) {
