@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.nio.ByteBuffer;
 
 /**
  * Created by blitZ on 3/8/2017.
@@ -48,16 +49,15 @@ public class Rm {
     }
 
     public void load(String fileName, String programName){
-        try (
-            BufferedReader in = new BufferedReader(new FileReader(fileName))){
-            byte[][] block = new byte[16][4];
-            int counter = 0;
-            byte[] temp = new byte[14];
+        byte[][] block = new byte[16][4];
+        int counter = 0;
+        byte[] temp = new byte[14];
+        try (BufferedReader in = new BufferedReader(new FileReader(fileName))){
             String buffer = in.readLine();
             if(buffer.equals("DSEG")) {
                 while (in.ready()) {//Kol yra ka skaityti.
                     buffer = in.readLine();
-                    System.out.println("buffer " +  buffer);
+                    //System.out.println("buffer " +  buffer);
                     if (buffer.equals("CSEG")){//Jei sutinkame CSEG, iseiname is ciklo
                         break;
                     }
@@ -75,6 +75,7 @@ public class Rm {
                 }
             }
             memory.addToSupervisor(block, false, programName);
+            counter = 0;
             block = new byte[16][4];
 
             if (buffer.equals("CSEG")){// Pabaigus DSEG, pereinam prie CSEG.
@@ -125,7 +126,7 @@ public class Rm {
 
     private byte[] intToByte(String string){
 
-        byte[] buffer = new byte[4];
+        /*byte[] buffer = new byte[4];
         int temp = Integer.valueOf(string);
 
         buffer[0] = (byte) (temp & 255);
@@ -134,8 +135,10 @@ public class Rm {
         temp = temp >> 8;
         buffer[2] = (byte) (temp & 255);
         temp = temp >> 8;
-        buffer[3] = (byte) (temp & 255);
+        buffer[3] = (byte) (temp & 255);*/
+        ByteBuffer temp = ByteBuffer.allocate(4);
+        temp.putInt(Integer.valueOf(string));
 
-        return buffer;
+        return temp.array();
     }
 }

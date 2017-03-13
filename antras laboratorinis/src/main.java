@@ -1,13 +1,12 @@
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Scanner;
 import Rm.Rm;
-import com.sun.xml.internal.fastinfoset.util.StringArray;
+import testTools.Test;
 
 /**
  * Created by blitZ on 3/8/2017.
  */
-public class main {
+public class Main {
 
     public static void main(String[] args) {
         Rm rm = new Rm();
@@ -37,15 +36,17 @@ public class main {
                 }
                 case "help": {
                     printHelp();
+                    break;
                 }
                 case "start": {
-
+                    break;
                 }
                 case "clear": {
-
+                    break;
                 }
                 case "test": {
-                    new test(rm).testSf();
+                    //new testTools.Test(rm).testSf();
+                    new Test(rm).testLoad("test", "AA");
                     break;
                 }
 
