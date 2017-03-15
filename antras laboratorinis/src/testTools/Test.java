@@ -29,7 +29,7 @@ public class Test {
     }
 
     public void testLoad(String fileName, String programName){
-        rm.load(fileName, programName);
+        //rm.load(fileName, programName);
     }
 
     /**
@@ -54,8 +54,12 @@ public class Test {
             System.out.println();
         }
     }
-    private static int bytesToInt(byte[] bytes){
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
-        return buffer.getInt();
+
+    public static int bytesToInt(byte[] bytes){
+        return ByteBuffer.wrap(bytes).getInt();
+    }
+
+    public static byte[] intToBytes(int integer, int size){
+        return ByteBuffer.allocate(size).putInt(integer).array();
     }
 }

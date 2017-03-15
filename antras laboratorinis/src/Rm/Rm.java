@@ -1,9 +1,9 @@
 package Rm;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import testTools.Test;
+import vm.Vm;
+
+import java.io.*;
 import java.nio.ByteBuffer;
 
 /**
@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
  */
 public class Rm {
     RmRegister mode;
-    RmRegister ptr;
+    public static RmRegister ptr;
     RmRegister sp;
     RmRegister r1;
     RmRegister r2;
@@ -23,7 +23,7 @@ public class Rm {
     RmInterrupt pi;
 
     public HDD hdd;
-    Memory memory;
+    public Memory memory;
 
     public RmStatusFlag sf;
 
@@ -46,6 +46,40 @@ public class Rm {
         ti = 10;
         hdd = new HDD();
         memory = new Memory(this);
+    }
+
+    public void load(String programName) throws Exception {
+        long pos = 0;
+        int ret = 0;// 0 - CSEG; 1 - DSEG; 2 - HALT
+        Vm vm = new Vm(this);
+        //vm.ptr.data = Test.intToBytes(memory.getFreeBlock(), 4);
+        byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
+        int vmPtr = -1;
+        for(int i = 0; i < 16; i++){
+            if(Test.bytesToInt(rmTable[i]) == 0) {
+                vmPtr = i;
+                break;
+            }
+        }
+        if(vmPtr == -1){
+            System.out.println("FUCK THIS SHIT IM OUT");
+            throw new Exception("FUCK THIS SHIT IM OUT");
+        }
+        vm.ptr.data = Test.intToBytes(vmPtr,4);
+        //memory.memory[Test.bytesToInt(Rm.ptr.data)][0] = vm.ptr.data;
+        try {
+            findFilePos(programName);
+            while(true){
+                String line = hdd.file.readLine();
+                ret = memory.addToVm(line, vm, programName);
+                //System.out.println(line);
+                if(ret == 2)
+                    break;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Load ended");
     }
 
     public void load(String fileName, String programName){
@@ -140,5 +174,51 @@ public class Rm {
         temp.putInt(Integer.valueOf(string));
 
         return temp.array();
+    }
+
+    private long findFilePos(String programName){
+        byte[] word = new byte[5];
+        byte[] pName = programName.getBytes();
+        int counter = 0;
+        int blockNr = 0;
+        long blockPosition = 0;
+        try {
+            hdd.file.seek(0);
+            while(true){
+                hdd.file.read(word, 0, 5);
+                if(pName[0] == word[0] && pName[1] == word[1]){
+                    blockPosition = hdd.getBlockPosition();
+                    break;
+                }
+                counter++;
+                if(counter % 16 == 0){
+                    hdd.file.read(word, 0, 1);
+                }
+            }
+            hdd.file.seek(1296);
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }// Found which file it is
+        try {// now go to that file
+            while(blockNr < counter) {
+                String line = hdd.file.readLine();
+                if (line.equals("$$$$")) {
+                    blockNr++;
+                    for (int i = 0; i < 16; i++) {
+                        hdd.file.readLine();
+                    }
+                }
+            }
+            //System.out.println("FOUND IT!!");
+            hdd.file.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return blockPosition;
+    }
+
+    public int getVirtualPtr(){
+        return 0;
     }
 }

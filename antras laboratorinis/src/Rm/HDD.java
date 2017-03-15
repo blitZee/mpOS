@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
  * Created by blitZ on 3/8/2017.
  */
 public class HDD implements Closeable {
-    RandomAccessFile file;
+    public RandomAccessFile file;
     byte[] word;
 
     public HDD() {
@@ -71,7 +71,7 @@ public class HDD implements Closeable {
         }
     }
 
-    private long getBlockPosition() throws IOException {
+    public long getBlockPosition() throws IOException {
         long pos = file.getFilePointer();
         return (pos / 5) * 1302;
     }
