@@ -49,20 +49,13 @@ public class Rm {
     }
 
     public void load(String programName) throws Exception {
-        long pos = 0;
         int ret = 0;// 0 - CSEG; 1 - DSEG; 2 - HALT
         Vm vm = new Vm(this);
         //vm.ptr.data = Test.intToBytes(memory.getFreeBlock(), 4);
         byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
-        int vmPtr = -1;
-        for(int i = 0; i < 16; i++){
-            if(Test.bytesToInt(rmTable[i]) == 0) {
-                vmPtr = i;
-                break;
-            }
-        }
+        int vmPtr = getVmPtr();// assign space in rm ptr. Value can be from 0 to 15
         if(vmPtr == -1){
-            System.out.println("FUCK THIS SHIT IM OUT");
+            System.out.println("FUCK THIS SHIT IM OUT");// TODO need to change this
             throw new Exception("FUCK THIS SHIT IM OUT");
         }
         vm.ptr.data = Test.intToBytes(vmPtr,4);
@@ -218,7 +211,21 @@ public class Rm {
         return blockPosition;
     }
 
-    public int getVirtualPtr(){
-        return 0;
+    private int getVmPtr(){
+        byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
+        int vmPtr = -1;
+        for(int i = 0; i < 16; i++){
+            if(Test.bytesToInt(rmTable[i]) == 0) {
+                vmPtr = i;
+                break;
+            }
+        }
+        return vmPtr;
     }
+
+    public void showBlock(int i){
+        byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
+        memory.showTrackMemory(ByteBuffer.wrap(rmTable[i]).getInt());
+    }
+
 }

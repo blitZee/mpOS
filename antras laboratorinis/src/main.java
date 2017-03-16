@@ -51,6 +51,10 @@ public class Main {
                         new Test(rm).testLoad("test", "AA");
                         break;
                     }
+                    case "show": {
+                        rm.showBlock(Integer.parseInt(inArray[1]));
+                        break;
+                    }
 
                 }
             }
