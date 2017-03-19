@@ -67,6 +67,13 @@ public class Test {
         }
     }
 
+    public static int hexToInt(char c){// c should be upper case letter
+        if(c >= 48 && c <= 57){
+            return c - 48;
+        } else
+            return c - 'A' + 10;
+    }
+
     public static int bytesToInt(byte[] bytes) {
         return ByteBuffer.wrap(bytes).getInt();
     }

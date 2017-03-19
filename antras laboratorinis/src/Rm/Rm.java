@@ -1,5 +1,6 @@
 package Rm;
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import testTools.Constants;
 import testTools.Test;
 import vm.Vm;
@@ -47,6 +48,35 @@ public class Rm {
         ti = 10;
         hdd = new HDD();
         memory = new Memory(this);
+    }
+
+    public void start(String programName){
+        byte[][] vmDescriptor = getVmDescriptor(programName);
+        if(vmDescriptor == null){
+            System.out.println("No such program");
+            return;
+        }
+        Vm vm = new Vm(this, vmDescriptor);
+        int[] codeBeginning = getCodeBeginning(vm);
+        int[] indexes;
+        //System.out.println("row: " + codeBeginning[0]);
+        //System.out.println("column: " + codeBeginning[1]);
+        int row = codeBeginning[0];
+        int column = codeBeginning[1];
+        byte[] command = getCommand(vm, row, column);
+        boolean cont;// continue
+        while(true) {
+            cont = executeCommand(vm, command);
+            vm.ic++;
+            if(!cont){
+                System.out.println("HALT!!!!!");
+                break;
+            }
+            indexes = getNextIndexes(vm);
+            row = indexes[0];
+            column = indexes[1];
+            command = getCommand(vm, row, column);
+        }
     }
 
     public void load(String programName) throws Exception {
@@ -214,6 +244,137 @@ public class Rm {
         for(int i = 0; i < 16; i++){
             descriptor[i] = Test.intToBytes(0, 4);
         }
+
+    }
+
+    private int[] getCodeBeginning(Vm vm){
+        int temp = Test.bytesToInt(vm.cs.data);
+        int[] ret = new int[2];
+        ret[0] = temp / 16;// row
+        ret[1] = temp % 16;// column
+        return ret;
+    }
+
+    private byte[] getCommand(Vm vm, int row, int col){
+        byte[] ret;
+        byte[][] rmPtrTable = memory.memory[ptr.getDataInt()];
+        byte[][] vmPtrTable = memory.memory[Test.bytesToInt(rmPtrTable[vm.ptr.getDataInt()])];
+        byte[][] rowInTable = memory.memory[Test.bytesToInt(vmPtrTable[row])];
+        ret = rowInTable[col];
+        return ret;
+    }
+
+    private int[] getNextIndexes(Vm vm){
+        int temp = Test.bytesToInt(vm.cs.data) + vm.ic;
+        int[] ret = new int[2];
+        ret[0] = temp / 16;// row
+        ret[1] = temp % 16;// column
+        return ret;
+    }
+
+    private boolean executeCommand(Vm vm, byte[] command){// returns false if command is HALT
+        String cmd = new String(command);
+        switch(cmd){
+            case "ADRR":
+                vm.adrr();
+                return true;
+            case "SBRR":
+                vm.sbrr();
+                return true;
+            case "MLRR":
+                vm.mlrr();
+                return true;
+            case "DVRR":
+                vm.dvrr();
+                return true;
+            case "MOV1":
+                vm.mov1();
+                return true;
+            case "MOV2":
+                vm.mov2();
+                return true;
+            case "PRNT":
+                vm.prnt();
+                return true;
+            case "PRNS":
+                vm.prns();
+                return true;
+            case "PUSH":
+                vm.push();
+                return true;
+            case "HALT":
+                vm.halt();
+                return false;
+        }
+        switch (cmd.substring(0, 3)){
+            case "AND":
+                vm.and();
+                return true;
+            case "XOR":
+                vm.xor();
+                return true;
+            case "NOT":
+                vm.not();
+                return true;
+            case "CMP":
+                vm.cmp();
+                return true;
+            case "POP":
+                vm.pop();
+                return true;
+        }
+        switch (cmd.substring(0, 2)){
+            case "AD":
+                vm.ad(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "SB":
+                vm.sb(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "ML":
+                vm.ml(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "DV":
+                vm.dv(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "LW":
+                vm.lw(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "SW":
+                vm.sw(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "JM":
+                vm.jm(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "JE":
+                vm.je(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "JA":
+                vm.ja(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "JL":
+                vm.jl(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "FO":
+                vm.fo(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "FR":
+                vm.fr(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "FW":
+                vm.fw(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                return true;
+            case "OR":
+                vm.or();
+                return true;
+            case "FC":
+                vm.fc();
+                return true;
+            case "FD":
+                vm.fd();
+                return true;
+        }
+        System.out.println("SOMETHING HORRIBLE JUST HAPPENED");
+        return false;
 
     }
 

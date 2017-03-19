@@ -42,6 +42,7 @@ public class Main {
                         break;
                     }
                     case "start": {
+                        rm.start(inArray[1]);
                         break;
                     }
                     case "clear": {

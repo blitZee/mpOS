@@ -1,5 +1,6 @@
 package vm;
 
+import testTools.Constants;
 import testTools.Test;
 
 import java.nio.ByteBuffer;
@@ -39,7 +40,18 @@ public class Vm {
         ic = 0;
     }
 
+    public Vm(Rm.Rm rm, byte[][] descriptor){
+        this(rm);
+        ptr.data = descriptor[Constants.VM_PTR_INDEX];
+        sp.data = descriptor[Constants.VM_SP_INDEX];
+        ds.data = descriptor[Constants.VM_DS_INDEX];
+        cs.data = descriptor[Constants.VM_CS_INDEX];
+        r1.data = descriptor[Constants.VM_R1_INDEX];
+        r2.data = descriptor[Constants.VM_R2_INDEX];
+    }
+
     public void adrr() {
+        System.out.println("ADRR");
         long temp;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
@@ -58,12 +70,14 @@ public class Vm {
     }
 
     public void ad(int x, int y) {
+        System.out.println("AD" + x + " " + y);
         long temp;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
     }
 
     public void sbrr() {
+        System.out.println("SBRR");
         int temp;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
@@ -82,7 +96,7 @@ public class Vm {
     }
 
     public void sb(int x, int y) {
-
+        System.out.println("SB" + x + " " + y);
     }
 
     public void mlrr() {
@@ -104,7 +118,7 @@ public class Vm {
     }
 
     public void ml(int x, int y) {
-
+        System.out.println("ML" + x + " " + y);
     }
 
     public void dvrr() {
@@ -268,6 +282,6 @@ public class Vm {
     }
 
     public void halt() {
-
+        System.out.println("HALT");
     }
 }
