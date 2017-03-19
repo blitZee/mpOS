@@ -11,10 +11,9 @@ public class RmStatusFlag {
     }
 
     public void setCf(int cf) {
-        if(cf > 0){
+        if (cf > 0) {
             sf = (byte) (sf | 4);
-        }
-        else{
+        } else {
             sf = (byte) (sf & 251);
         }
     }
@@ -24,10 +23,9 @@ public class RmStatusFlag {
     }
 
     public void setOf(int of) {
-        if(of > 0){
+        if (of > 0) {
             sf = (byte) (sf | 1);
-        }
-        else{
+        } else {
             sf = (byte) (sf & 254);
         }
     }
@@ -37,10 +35,9 @@ public class RmStatusFlag {
     }
 
     public void setZf(int zf) {
-        if(zf > 0){
+        if (zf > 0) {
             sf = (byte) (sf | 2);
-        }
-        else{
+        } else {
             sf = (byte) (sf & 253);
         }
     }
@@ -49,8 +46,8 @@ public class RmStatusFlag {
         this.sf = 0;
     }
 
-    public void print(){
+    public void print() {
         String temp = "00000000" + Integer.toBinaryString(sf);
-        System.out.println(temp.substring(temp.length()-8));
+        System.out.println(temp.substring(temp.length() - 8));
     }
 }

@@ -22,11 +22,11 @@ public class HDD implements Closeable {
         }
     }
 
-    public String readFromMemory(){
+    public String readFromMemory() {
         return new String("your mom");
     }
 
-    public void writeToMemory(){
+    public void writeToMemory() {
 
     }
 
@@ -35,9 +35,9 @@ public class HDD implements Closeable {
         bName = name.getBytes();
         file.seek(0);// always go to the beginning of file and read from there
         try {
-            while(true) {// first we need to find where that file is
+            while (true) {// first we need to find where that file is
                 file.read(word, 0, 5);
-                if(bName[0] == word[0] && bName[1] == word[1]){
+                if (bName[0] == word[0] && bName[1] == word[1]) {
                     break;
                 }
             }
@@ -53,16 +53,16 @@ public class HDD implements Closeable {
         int offset = parseFirstWord();// read first word and parse it
         // TODO: Need to change pdf file, because now first word of file says name of the file and offset that I need to
         // TODO write to
-        if(offset == 0){
+        if (offset == 0) {
             file.seek(pos);
             file.write(name);
-        }else
+        } else
             file.seek(pos + 2);// skip file name
         file.write(Integer.toHexString(offset + len).getBytes());// write new offset for future
         //file.write(" ".getBytes());// and add space
         file.seek(pos + offset * 5 + 5);
         // now just write the content of block
-        for(int i = 0; i < len; i++){
+        for (int i = 0; i < len; i++) {
             file.write(block[i]);
             /*if(i == 15)
                 file.writeByte(10);
@@ -75,16 +75,17 @@ public class HDD implements Closeable {
         long pos = file.getFilePointer();
         return (pos / 5) * 1302;
     }
-    private int parseFirstWord(){
+
+    private int parseFirstWord() {
         byte[] temp = new byte[2];
-        temp[0] = getByteFromChar((char)word[2]);
-        temp[1] = getByteFromChar((char)word[3]);
-       // System.out.println(temp[0] * temp[1]);
+        temp[0] = getByteFromChar((char) word[2]);
+        temp[1] = getByteFromChar((char) word[3]);
+        // System.out.println(temp[0] * temp[1]);
         return temp[0] * 16 + temp[1];
     }
 
-    private byte getByteFromChar(char c){
-        if(Character.isDigit(c))
+    private byte getByteFromChar(char c) {
+        if (Character.isDigit(c))
             return (byte) (c - 48);
         else return (byte) (c - 65 + 10);
     }

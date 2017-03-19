@@ -5,7 +5,8 @@ package vm;
  */
 public class VmRegister extends Rm.RmRegister {
     public int blocksUsed = 0;
-    public VmRegister(int size, String name){
+
+    public VmRegister(int size, String name) {
         super(size, name);
     }
 }

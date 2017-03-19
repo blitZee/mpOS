@@ -1,5 +1,6 @@
 package Rm;
 
+import testTools.Constants;
 import testTools.Test;
 import vm.Vm;
 
@@ -49,127 +50,50 @@ public class Rm {
     }
 
     public void load(String programName) throws Exception {
-        int ret = 0;// 0 - CSEG; 1 - DSEG; 2 - HALT
-        Vm vm = new Vm(this);
-        //vm.ptr.data = Test.intToBytes(memory.getFreeBlock(), 4);
-        byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
-        int vmPtr = getVmPtr();// assign space in rm ptr. Value can be from 0 to 15
-        if(vmPtr == -1){
-            System.out.println("FUCK THIS SHIT IM OUT");// TODO need to change this
-            throw new Exception("FUCK THIS SHIT IM OUT");
+        if(getVmDescriptor(programName) != null){
+            System.out.println("Program with this name already exists");
+            return;
         }
-        vm.ptr.data = Test.intToBytes(vmPtr,4);
-        //memory.memory[Test.bytesToInt(Rm.ptr.data)][0] = vm.ptr.data;
+
+        int ret = 0;
+        int vmPtr = getVmPtr();// assign space in rm ptr. Value can be from 0 to 15
+        if (vmPtr == -1) {
+            System.out.println("Out of space to add vm to pages table");
+            return;
+        }
+        Vm vm = new Vm(this);// create vm only after we know that there are enough space in rm ptr
+        byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
+        vm.ptr.data = Test.intToBytes(vmPtr, 4);
+        rmTable[vmPtr] = Test.intToBytes(memory.getFreeBlock(), 4);
         try {
             findFilePos(programName);
-            while(true){
+            while (true) {
                 String line = hdd.file.readLine();
-                ret = memory.addToVm(line, vm, programName);
-                //System.out.println(line);
-                if(ret == 2)
+                ret = memory.addToVm(line, vm, programName, ret);
+                if (ret == Constants.HALT)
                     break;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            //removeVm(vm);
+            //System.out.println("Removed vm");
+            System.out.println("IO Exception");
+            // e.printStackTrace();
+        } catch (Exception e) {
+            removeVm(vm);
+            System.out.println("Removed vm");
+            System.out.println("Incorrect code");
         }
         System.out.println("Load ended");
+        //now add to vm list
+        byte[][] vmListTable = memory.memory[memory.vmList];
+        byte[][] vmDescriptor = memory.memory[Test.bytesToInt(vmListTable[vm.ptr.getDataInt()])];
+        vmDescriptor[Constants.VM_NAME_INDEX] = programName.getBytes();
+        vmDescriptor[Constants.VM_CS_INDEX] = vm.cs.data;
+        vmDescriptor[Constants.VM_DS_INDEX] = vm.ds.data;
+        vmDescriptor[Constants.VM_PTR_INDEX] = vm.ptr.data;
     }
 
-    public void load(String fileName, String programName){
-        byte[][] block = new byte[16][4];
-        int counter = 0;
-        byte[] temp = new byte[14];
-        try (BufferedReader in = new BufferedReader(new FileReader(fileName))){
-            String buffer = in.readLine();
-            if(buffer.equals("DSEG")) {
-                while (in.ready()) {//Kol yra ka skaityti.
-                    buffer = in.readLine();
-                    //System.out.println("buffer " +  buffer);
-                    if (buffer.equals("CSEG")){//Jei sutinkame CSEG, iseiname is ciklo
-                        break;
-                    }
-                    if (buffer.startsWith("DW")) {
-                        counter = addDataToBlock(block, buffer, counter); // Jei eilute prasideda 'DW', kviecieme funkcija,
-                        // kuri prideda duomenis i bloka ir grazina nauja counter reiksme, jei ji pasikeite.
-
-                        if (counter >= 15) { //Jei counter reiksme pasiekia bloko dydi, ji yra nunulinama ir blokas pridedamas
-                            //i supervizoriaus atminti
-                            memory.addToSupervisor(block, false, programName);
-                            counter = 0;
-                            block = new byte[16][4];
-                        }
-                    }
-                }
-            }
-            memory.addToSupervisor(block, false, programName);
-            counter = 0;
-            block = new byte[16][4];
-
-            if (buffer.equals("CSEG")){// Pabaigus DSEG, pereinam prie CSEG.
-                while (in.ready()) {//Kol yra ka skaityti.
-                    buffer = in.readLine();
-                    //System.out.println(buffer);
-                    if (buffer.equals("HALT")){//Jei sutinkame HALT, iseiname is ciklo
-                        counter = addCodeToBlock(block, buffer, counter);
-                        break;
-                    }
-                    counter = addCodeToBlock(block, buffer, counter); // Kviecieme funkcija,
-                    // kuri prideda duomenis i bloka ir grazina nauja counter reiksme, jei ji pasikeite.
-                    //validacija vyksta supervizoriaus atminty
-
-                    if (counter > 15) { //Jei counter reiksme pasiekia bloko dydi, ji yra nunulinama ir blokas pridedamas
-                        //i supervizoriaus atminti
-                        memory.addToSupervisor(block, true, programName);
-                        counter = 0;
-                        block = new byte[16][4];
-                    }
-                }
-                memory.addToSupervisor(block, true, programName);
-            }
-
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    private int addDataToBlock(byte[][] block, String buffer, int counter){
-        block[counter][0] = 'D';
-        block[counter][1] = 'W';
-        counter++;
-        block[counter] = intToByte(buffer.substring(3));
-        counter++;
-        return counter;
-    }
-
-    private int addCodeToBlock(byte[][] block, String buffer, int counter){
-        block[counter] = buffer.getBytes();
-        counter++;
-        return counter;
-    }
-
-    private byte[] intToByte(String string){
-
-        /*byte[] buffer = new byte[4];
-        int temp = Integer.valueOf(string);
-
-        buffer[0] = (byte) (temp & 255);
-        temp = temp >> 8;
-        buffer[1] = (byte) (temp & 255);
-        temp = temp >> 8;
-        buffer[2] = (byte) (temp & 255);
-        temp = temp >> 8;
-        buffer[3] = (byte) (temp & 255);*/
-        ByteBuffer temp = ByteBuffer.allocate(4);
-        temp.putInt(Integer.valueOf(string));
-
-        return temp.array();
-    }
-
-    private long findFilePos(String programName){
+    private long findFilePos(String programName) {
         byte[] word = new byte[5];
         byte[] pName = programName.getBytes();
         int counter = 0;
@@ -177,24 +101,23 @@ public class Rm {
         long blockPosition = 0;
         try {
             hdd.file.seek(0);
-            while(true){
+            while (true) {
                 hdd.file.read(word, 0, 5);
-                if(pName[0] == word[0] && pName[1] == word[1]){
+                if (pName[0] == word[0] && pName[1] == word[1]) {
                     blockPosition = hdd.getBlockPosition();
                     break;
                 }
                 counter++;
-                if(counter % 16 == 0){
+                if (counter % 16 == 0) {
                     hdd.file.read(word, 0, 1);
                 }
             }
             hdd.file.seek(1296);
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }// Found which file it is
         try {// now go to that file
-            while(blockNr < counter) {
+            while (blockNr < counter) {
                 String line = hdd.file.readLine();
                 if (line.equals("$$$$")) {
                     blockNr++;
@@ -211,11 +134,11 @@ public class Rm {
         return blockPosition;
     }
 
-    private int getVmPtr(){
+    private int getVmPtr() {
         byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
         int vmPtr = -1;
-        for(int i = 0; i < 16; i++){
-            if(Test.bytesToInt(rmTable[i]) == 0) {
+        for (int i = 0; i < 16; i++) {
+            if (Test.bytesToInt(rmTable[i]) == 0) {
                 vmPtr = i;
                 break;
             }
@@ -223,9 +146,79 @@ public class Rm {
         return vmPtr;
     }
 
-    public void showBlock(int i){
-        byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
-        memory.showTrackMemory(ByteBuffer.wrap(rmTable[i]).getInt());
+    public void showBlock(String programName) {
+        byte[][] vmListTable = memory.memory[memory.vmList];
+        byte[][] vmDescriptor;
+        for(int i = 0; i < 16; i++){
+            vmDescriptor = memory.memory[Test.bytesToInt(vmListTable[i])];
+            if(namesEqual(vmDescriptor[Constants.VM_NAME_INDEX], programName.getBytes()))
+            {
+                byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
+                memory.showTrackMemory(ByteBuffer.wrap(rmTable[i]).getInt());
+                break;
+            }
+        }
+    }
+
+    public byte[][] getVmDescriptor(String programName){
+        byte[][] vmListTable = memory.memory[memory.vmList];
+        byte[][] vmDescriptor;
+        for(int i = 0; i < 16; i++){
+            vmDescriptor = memory.memory[Test.bytesToInt(vmListTable[i])];
+            if(namesEqual(vmDescriptor[Constants.VM_NAME_INDEX], programName.getBytes()))
+            {
+                return vmDescriptor;
+            }
+        }
+        return null;
+    }
+
+    private void removeVm(Vm vm) {
+        int rmPtr = Test.bytesToInt(Rm.ptr.data);
+        byte[][] rmPtrTable = memory.memory[rmPtr];
+        int vmPtr = Test.bytesToInt(vm.ptr.data);
+        byte[][] vmPtrTable = memory.memory[Test.bytesToInt(rmPtrTable[vmPtr])];
+        rmPtrTable[vmPtr] = Test.intToBytes(0, 4);
+        for (int i = 0; i < 16; i++) {
+            byte[][] track = memory.memory[Test.bytesToInt(vmPtrTable[i])];
+            vmPtrTable[i] = Test.intToBytes(0, 4);
+            for (int j = 0; j < 16; j++) {
+                track[j] = Test.intToBytes(0, 4);
+            }
+        }
+        byte[][] vmListTable = memory.memory[memory.vmList];
+        byte[][] vmDescriptor = memory.memory[Test.bytesToInt(vmListTable[vm.ptr.getDataInt()])];
+        for(int i = 0; i < 16; i++){
+            vmDescriptor[i] = Test.intToBytes(0, 4);
+        }
+    }
+
+    public void removeVm(String programName){
+        int rmPtr = Test.bytesToInt(Rm.ptr.data);
+        byte[][] rmPtrTable = memory.memory[rmPtr];
+        byte[][] descriptor = getVmDescriptor(programName);
+        if(descriptor == null){
+            System.out.println("No such program");
+            return;
+        }
+        int vmPtr = Test.bytesToInt(descriptor[Constants.VM_PTR_INDEX]);
+        byte[][] vmPtrTable = memory.memory[Test.bytesToInt(rmPtrTable[vmPtr])];
+        rmPtrTable[vmPtr] = Test.intToBytes(0, 4);
+        for (int i = 0; i < 16; i++) {
+            byte[][] track = memory.memory[Test.bytesToInt(vmPtrTable[i])];
+            vmPtrTable[i] = Test.intToBytes(0, 4);
+            for (int j = 0; j < 16; j++) {
+                track[j] = Test.intToBytes(0, 4);
+            }
+        }
+        for(int i = 0; i < 16; i++){
+            descriptor[i] = Test.intToBytes(0, 4);
+        }
+
+    }
+
+    private boolean namesEqual(byte[] arr1, byte[] arr2){
+        return arr1[0] == arr2[0] && arr1[1] == arr2[1];
     }
 
 }

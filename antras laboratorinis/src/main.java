@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.Scanner;
+
 import Rm.Rm;
 import testTools.Test;
 
@@ -44,46 +45,47 @@ public class Main {
                         break;
                     }
                     case "clear": {
+                        rm.removeVm(inArray[1]);
                         break;
                     }
                     case "test": {
                         //new testTools.Test(rm).testSf();
-                        new Test(rm).testLoad("test", "AA");
+                        new Test(rm).testLoad(inArray[1]);
                         break;
                     }
                     case "show": {
-                        rm.showBlock(Integer.parseInt(inArray[1]));
+                        rm.showBlock(inArray[1]);
                         break;
                     }
 
                 }
             }
             System.out.println("Exiting");
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void printHelp(){
+    private static void printHelp() {
         System.out.println("• Help - Prints this message;");
         System.out.println("• Load - Loads a program from HDD to real memory -p - Program name (up to 2 characters; Must be unique)");
         System.out.println("• Start - Starts a program. -p - Program name");
-        System.out.println("• Clear - Clears a loaded program. -p - Program name. Type \"all\" instead to clear everything.");
+        System.out.println("• Clear - Clears a loaded program. -p - Program name.");
         System.out.println("• Quit - Shuts down the OS");
     }
 
-    private static String fileName(String[] array){
-        for(int i = 1; i < array.length; i++ ){
-            if(array[i].equals("-f"))
-                return array[i+1];
+    private static String fileName(String[] array) {
+        for (int i = 1; i < array.length; i++) {
+            if (array[i].equals("-f"))
+                return array[i + 1];
         }
         return null;
     }
-    private static String programName(String[] array){
-        for(int i = 1; i < array.length; i++ ){
-            if(array[i].equals("-p"))
-                return array[i+1];
+
+    private static String programName(String[] array) {
+        for (int i = 1; i < array.length; i++) {
+            if (array[i].equals("-p"))
+                return array[i + 1];
         }
         return null;
     }
