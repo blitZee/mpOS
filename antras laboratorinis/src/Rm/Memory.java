@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
  * Created by blitZ on 3/8/2017.
  */
 public class Memory {
-    byte[][][] memory;
+    public byte[][][] memory;
     HDD hdd;
     boolean prevDW = false;
     boolean prevDT = false;

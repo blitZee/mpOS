@@ -50,9 +50,9 @@ public class Rm {
         memory = new Memory(this);
     }
 
-    public void start(String programName){
+    public void start(String programName) {
         byte[][] vmDescriptor = getVmDescriptor(programName);
-        if(vmDescriptor == null){
+        if (vmDescriptor == null) {
             System.out.println("No such program");
             return;
         }
@@ -65,10 +65,10 @@ public class Rm {
         int column = codeBeginning[1];
         byte[] command = getCommand(vm, row, column);
         boolean cont;// continue
-        while(true) {
+        while (true) {
             cont = executeCommand(vm, command);
             vm.ic++;
-            if(!cont){
+            if (!cont) {
                 System.out.println("HALT!!!!!");
                 break;
             }
@@ -80,7 +80,7 @@ public class Rm {
     }
 
     public void load(String programName) throws Exception {
-        if(getVmDescriptor(programName) != null){
+        if (getVmDescriptor(programName) != null) {
             System.out.println("Program with this name already exists");
             return;
         }
@@ -162,6 +162,109 @@ public class Rm {
             e.printStackTrace();
         }
         return blockPosition;
+    }
+
+    public int getFilePos(int x, int y, boolean open) {
+        byte[] word = new byte[5];
+        byte[] pName = new byte[2];
+        pName[0] = (byte) x;
+        pName[1] = (byte) y;
+        int counter = 0;
+        try {
+            hdd.file.seek(0);
+            while (true) {
+                hdd.file.read(word, 0, 5);
+                if (pName[0] == word[0] && pName[1] == word[1]) {
+                    hdd.file.seek(hdd.file.getFilePointer() - 3);
+                    hdd.file.writeByte('1');
+                    break;
+                }
+                counter++;
+                if (counter % 16 == 0) {
+                    hdd.file.read(word, 0, 1);
+                }
+            }
+            hdd.file.seek(1296);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }// Found which file it is
+
+
+        return counter;
+    }
+
+    public void closeFile(byte[] handler){
+        byte[] word = new byte[5];
+        byte[] pName = new byte[2];
+        int hndl = Test.bytesToInt(handler);
+        int counter = 0;
+        try {
+            hdd.file.seek(0);
+            for(int i = 0; i < hndl; i++) {
+                hdd.file.read(word, 0, 5);
+                counter++;
+                if (counter % 16 == 0) {
+                    hdd.file.read(word, 0, 1);
+                }
+            }
+            hdd.file.seek(hdd.file.getFilePointer() + 2);
+            long k = hdd.file.getFilePointer();
+            hdd.file.writeByte('0');
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }// Found which file it is
+
+    }
+
+    public void fileRead(byte[] dr1, int x, int y, byte[] dr2, Vm vm){
+        //DR1 - file handler
+        // 10*x + y - vieta, i kuria rasysim duomenu segmente
+        //DR2 - adresas is kurio skaitysim
+        int dr1Int = ByteBuffer.wrap(dr1).getInt();
+        int blockNr = 0;
+        try {
+            hdd.file.seek(1296);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {// now go to that file
+            while (blockNr < dr1Int) {
+                String line = hdd.file.readLine();
+                if (line.equals("$$$$")) {
+                    blockNr++;
+                    for (int i = 0; i < 16; i++) {
+                        hdd.file.readLine();
+                    }
+                }
+            }
+            //System.out.println("FOUND IT!!");
+            hdd.file.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            byte[] temp = new byte[5];
+            int readPosition = Test.bytesToInt(dr2);
+            for(int i = 0; i < readPosition; i++){
+                for(int j = 16 * i; j < readPosition; j++){
+                    hdd.file.read(temp, 0, 5);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] word = new byte[4];
+        try {
+            hdd.file.read(word, 0, 4);
+            try {
+                vm.saveData(x, y, word);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private int getVmPtr() {
@@ -355,7 +458,7 @@ public class Rm {
                 vm.jl(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "FO":
-                vm.fo(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.fo(cmd.charAt(2), cmd.charAt(3));
                 return true;
             case "FR":
                 vm.fr(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));

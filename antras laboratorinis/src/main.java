@@ -51,7 +51,9 @@ public class Main {
                     }
                     case "test": {
                         //new testTools.Test(rm).testSf();
-                        new Test(rm).testLoad(inArray[1]);
+                        //new Test(rm).testLoad(inArray[1]);
+                        rm.load(inArray[1]);
+                        rm.start(inArray[1]);
                         break;
                     }
                     case "show": {
