@@ -1,5 +1,6 @@
 package Rm;
 
+import com.sun.org.apache.xpath.internal.SourceTree;
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import testTools.Constants;
 import testTools.Test;
@@ -7,11 +8,14 @@ import vm.Vm;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.Scanner;
 
 /**
  * Created by blitZ on 3/8/2017.
  */
 public class Rm {
+    public static boolean stepMode = true;
+
     RmRegister mode;
     public static RmRegister ptr;
     RmRegister sp;
@@ -57,6 +61,7 @@ public class Rm {
             System.out.println("No such program");
             return;
         }
+        Scanner scanner = new Scanner(System.in);
         Vm vm = new Vm(this, vmDescriptor);
         int[] codeBeginning = getCodeBeginning(vm);
         int[] indexes;
@@ -64,9 +69,28 @@ public class Rm {
         //System.out.println("column: " + codeBeginning[1]);
         int row = codeBeginning[0];
         int column = codeBeginning[1];
-        byte[] command = getCommand(vm, row, column);
+        byte[] command;
         boolean cont;// continue
         while (true) {
+            command = getCommand(vm, row, column);
+            if(stepMode){
+                showRegister(vm);
+                System.out.println("Next command: " + new String(command));
+                while(true) {
+                    String line = scanner.nextLine();
+                    if (line.toUpperCase().equals("SHOW CS")) {
+                        showCseg(programName);
+                    } else if (line.toUpperCase().equals("SHOW DS")) {
+                        showDseg(programName);
+                    } else if (line.toUpperCase().equals("FINISH")) {
+                        stepMode = false;
+                        break;
+                    }
+                    if (line.equals("")) {
+                        break;
+                    }
+                }
+            }
             cont = executeCommand(vm, command);
             vm.ic++;
             timer--;
@@ -76,7 +100,6 @@ public class Rm {
             indexes = getNextIndexes(vm);
             row = indexes[0];
             column = indexes[1];
-            command = getCommand(vm, row, column);
             test(vm);
         }
     }
@@ -533,7 +556,21 @@ public class Rm {
         setSI(InterruptType.UNDEFINED_OPERATION);
         System.out.println("SOMETHING HORRIBLE JUST HAPPENED");
         return false;
+    }
 
+    private void showRegister(Vm vm){
+        int numOfSpaces = 11;
+        System.out.println("REGISTERS: PTR         R1         R2         DS         CS         TI         IC");
+        System.out.println(String.format("   %" + numOfSpaces + "s" + "%" + numOfSpaces + "s" +"%" + numOfSpaces + "s"
+                        +"%" + numOfSpaces + "s" +"%" + numOfSpaces + "s"  +"%" + numOfSpaces + "s"
+                        +"%" + numOfSpaces + "s",
+                String.valueOf(vm.ptr.getDataInt()),
+                String.valueOf(vm.r1.getDataInt()),
+                String.valueOf(vm.r2.getDataInt()),
+                String.valueOf(vm.ds.getDataInt()),
+                String.valueOf(vm.cs.getDataInt()),
+                timer,
+                vm.ic));
     }
     private void test(Vm vm){
         if(si.type != InterruptType.NO_INTERUPT){

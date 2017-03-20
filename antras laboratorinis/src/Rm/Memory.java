@@ -485,12 +485,14 @@ public class Memory {
                         }
                         System.out.print("CSEG ");
                         printCSEG(csIndex%16,vmBlockNumber);
+                        System.out.println();
                     } else {
                         printCSEG(0, vmBlockNumber);
+                        System.out.println();
                     }
 
                 }
-                System.out.println();
+                //System.out.println();
             }
         }
     }

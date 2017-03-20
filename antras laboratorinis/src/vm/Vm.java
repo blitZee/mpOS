@@ -11,8 +11,8 @@ import java.nio.ByteBuffer;
  */
 public class Vm {
     public VmRegister ptr;
-    VmRegister r1;
-    VmRegister r2;
+    public VmRegister r1;
+    public VmRegister r2;
     public VmRegister ds;
     public VmRegister cs;
     public VmRegister sp;

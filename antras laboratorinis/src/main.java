@@ -98,6 +98,9 @@ public class Main {
                         }
                         break;
                     }
+                    case "step": {
+                        Rm.stepMode = true;
+                    }
 
 
                 }
@@ -113,6 +116,10 @@ public class Main {
         System.out.println("• Load - Loads a program from HDD to real memory -p - Program name (up to 2 characters; Must be unique)");
         System.out.println("• Start - Starts a program. -p - Program name");
         System.out.println("• Clear - Clears a loaded program. -p - Program name.");
+        System.out.println("• Show - Shows programs memory. -p - Program name.");
+        System.out.println("• Showcs - Shows programs code segment. -p - Program name.");
+        System.out.println("• Step - Set programs to execute in step mode. -p - Program name.");
+        System.out.println("• Nostep - Set programs to execute in non step mode. -p - Program name.");
         System.out.println("• Quit - Shuts down the OS");
     }
 
