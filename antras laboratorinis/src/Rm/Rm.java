@@ -29,6 +29,7 @@ public class Rm {
 
     public RmStatusFlag sf;
 
+    int timer = 10;
     int ic;
     int ti;
 
@@ -41,8 +42,8 @@ public class Rm {
         ch1 = new RmRegister(1, "channel 1");
         ch2 = new RmRegister(1, "channel 2");
         ch3 = new RmRegister(1, "channel 3");
-        si = new RmInterrupt(InterruptType.SI);
-        pi = new RmInterrupt(InterruptType.PI);
+        si = new RmInterrupt(InterruptType.NO_INTERUPT);
+        pi = new RmInterrupt(InterruptType.NO_INTERUPT);
         sf = new RmStatusFlag();
         ic = 0;
         ti = 10;
@@ -68,14 +69,15 @@ public class Rm {
         while (true) {
             cont = executeCommand(vm, command);
             vm.ic++;
+            timer--;
             if (!cont) {
-                System.out.println("HALT!!!!!");
                 break;
             }
             indexes = getNextIndexes(vm);
             row = indexes[0];
             column = indexes[1];
             command = getCommand(vm, row, column);
+            test(vm);
         }
     }
 
@@ -96,12 +98,20 @@ public class Rm {
         vm.ptr.data = Test.intToBytes(vmPtr, 4);
         rmTable[vmPtr] = Test.intToBytes(memory.getFreeBlock(), 4);
         try {
-            findFilePos(programName);
+            long pos = findFilePos(programName);
+            if(pos < 0) {
+                System.out.println("No such program");
+                return;
+            }
             while (true) {
                 String line = hdd.file.readLine();
                 ret = memory.addToVm(line, vm, programName, ret);
                 if (ret == Constants.HALT)
                     break;
+                else if(ret == Constants.NO_MEMORY){
+                    System.out.println("No memory");
+                    removeVm(vm);
+                }
             }
         } catch (IOException e) {
             //removeVm(vm);
@@ -112,6 +122,7 @@ public class Rm {
             removeVm(vm);
             System.out.println("Removed vm");
             System.out.println("Incorrect code");
+            return;
         }
         System.out.println("Load ended");
         //now add to vm list
@@ -127,7 +138,6 @@ public class Rm {
         byte[] word = new byte[5];
         byte[] pName = programName.getBytes();
         int counter = 0;
-        int blockNr = 0;
         long blockPosition = 0;
         try {
             hdd.file.seek(0);
@@ -141,12 +151,15 @@ public class Rm {
                 if (counter % 16 == 0) {
                     hdd.file.read(word, 0, 1);
                 }
+                if(counter > 256){
+                    return -1;
+                }
             }
             hdd.file.seek(1296);
         } catch (Exception ex) {
             ex.printStackTrace();
         }// Found which file it is
-        try {// now go to that file
+        /*try {
             while (blockNr < counter) {
                 String line = hdd.file.readLine();
                 if (line.equals("$$$$")) {
@@ -160,7 +173,8 @@ public class Rm {
             hdd.file.readLine();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
+        goToFilePosition(counter);
         return blockPosition;
     }
 
@@ -195,7 +209,6 @@ public class Rm {
 
     public void closeFile(byte[] handler){
         byte[] word = new byte[5];
-        byte[] pName = new byte[2];
         int hndl = Test.bytesToInt(handler);
         int counter = 0;
         try {
@@ -208,7 +221,6 @@ public class Rm {
                 }
             }
             hdd.file.seek(hdd.file.getFilePointer() + 2);
-            long k = hdd.file.getFilePointer();
             hdd.file.writeByte('0');
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -221,14 +233,13 @@ public class Rm {
         // 10*x + y - vieta, i kuria rasysim duomenu segmente
         //DR2 - adresas is kurio skaitysim
         int dr1Int = ByteBuffer.wrap(dr1).getInt();
-        int blockNr = 0;
         try {
             hdd.file.seek(1296);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        try {// now go to that file
+        /*try {// now go to that file
             while (blockNr < dr1Int) {
                 String line = hdd.file.readLine();
                 if (line.equals("$$$$")) {
@@ -242,14 +253,15 @@ public class Rm {
             hdd.file.readLine();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
+        goToFilePosition(dr1Int);
         try {
             byte[] temp = new byte[5];
             int readPosition = Test.bytesToInt(dr2);
             for(int i = 0; i < readPosition; i++){
-                for(int j = 16 * i; j < readPosition; j++){
-                    hdd.file.read(temp, 0, 5);
-                }
+                if((i + 1) % 16 == 0)
+                    hdd.file.readByte();
+                hdd.file.read(temp, 0, 5);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -262,6 +274,40 @@ public class Rm {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void goToFilePosition(int handler){
+        int blockNr = 0;
+        try {// now go to that file
+            hdd.file.seek(1296);
+            while (blockNr < handler) {
+                String line = hdd.file.readLine();
+                if (line.equals("$$$$")) {
+                    blockNr++;
+                    for (int i = 0; i < 16; i++) {
+                        hdd.file.readLine();
+                    }
+                }
+            }
+            hdd.file.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void fileWrite(byte[] dr1, byte[] data, byte[] dr2){
+        goToFilePosition(Test.bytesToInt(dr1));
+        try {
+            byte[] temp = new byte[5];
+            int writePosition = Test.bytesToInt(dr2);
+            for(int i = 0; i < writePosition; i++){
+                if((i + 1) % 16 == 0)
+                    hdd.file.readByte();
+                hdd.file.read(temp, 0, 5);
+            }
+            hdd.file.write(data);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -291,6 +337,14 @@ public class Rm {
                 break;
             }
         }
+    }
+
+    public void showCseg(String programName){
+        memory.showCodeSegment(this, programName);
+    }
+
+    public void showDseg(String programName){
+        memory.showDataSegment(this, programName);
     }
 
     public byte[][] getVmDescriptor(String programName){
@@ -476,9 +530,26 @@ public class Rm {
                 vm.fd();
                 return true;
         }
+        setSI(InterruptType.UNDEFINED_OPERATION);
         System.out.println("SOMETHING HORRIBLE JUST HAPPENED");
         return false;
 
+    }
+    private void test(Vm vm){
+        if(si.type != InterruptType.NO_INTERUPT){
+            System.out.println("System interrupt");
+        }
+        if(pi.type != InterruptType.NO_INTERUPT){
+            System.out.println("Program interrupt");
+        }
+        if(timer == 0){
+            System.out.println("Timer interupt");
+            timer = 10;
+        }
+    }
+
+    public void setSI(InterruptType interupt){
+        si.type = interupt;
     }
 
     private boolean namesEqual(byte[] arr1, byte[] arr2){

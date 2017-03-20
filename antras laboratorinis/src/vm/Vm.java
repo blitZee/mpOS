@@ -353,19 +353,25 @@ public class Vm {
     }
 
     public void jm(int x, int y) {
-
+        ic = 16 * x + y;
     }
 
     public void je(int x, int y) {
-
+        if(sf.getZf()){
+            ic = 16 * x + y;
+        }
     }
 
     public void ja(int x, int y) {
-
+        if(!sf.getCf() && !sf.getZf()){
+            ic = 16 * x + y;
+        }
     }
 
     public void jl(int x, int y) {
-
+        if(sf.getCf()){
+            ic = 16 * x + y;
+        }
     }
     public void fo(int x, int y) {
         int pos = rm.getFilePos(x, y, true);
@@ -386,6 +392,15 @@ public class Vm {
     }
 
     public void fw(int x, int y) {
+        try {
+            byte[] data  = getData(x, y);
+            if(r2.getDataInt() < 255)
+                rm.fileWrite(r1.data, data, r2.data);
+            else
+                System.out.println("File is not big enough");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

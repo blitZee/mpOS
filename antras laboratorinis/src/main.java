@@ -31,7 +31,12 @@ public class Main {
                     }
                     case "load": {
                         //rm.load(fileName(inArray), programName(inArray));
-                        rm.load(programName(inArray));
+                        String programName = programName(inArray);
+                        if(programName != null)
+                            rm.load(programName);
+                        else {
+                            System.out.println("No program name given");
+                        }
                         break;
                     }
                     case "save": {
@@ -42,11 +47,21 @@ public class Main {
                         break;
                     }
                     case "start": {
-                        rm.start(inArray[1]);
+                        String programName = programName(inArray);
+                        if(programName != null)
+                            rm.start(programName);
+                        else {
+                            System.out.println("No program name given");
+                        }
                         break;
                     }
                     case "clear": {
-                        rm.removeVm(inArray[1]);
+                        String programName = programName(inArray);
+                        if(programName != null)
+                            rm.removeVm(programName);
+                        else {
+                            System.out.println("No program name given");
+                        }
                         break;
                     }
                     case "test": {
@@ -57,9 +72,33 @@ public class Main {
                         break;
                     }
                     case "show": {
-                        rm.showBlock(inArray[1]);
+                        String programName = programName(inArray);
+                        if(programName != null)
+                            rm.showBlock(programName);
+                        else {
+                            System.out.println("No program name given");
+                        }
                         break;
                     }
+                    case "showcs": {
+                        String programName = programName(inArray);
+                        if(programName != null)
+                            rm.showCseg(programName);
+                        else {
+                            System.out.println("No program name given");
+                        }
+                        break;
+                    }
+                    case "showds": {
+                        String programName = programName(inArray);
+                        if(programName != null)
+                            rm.showDseg(programName);
+                        else {
+                            System.out.println("No program name given");
+                        }
+                        break;
+                    }
+
 
                 }
             }

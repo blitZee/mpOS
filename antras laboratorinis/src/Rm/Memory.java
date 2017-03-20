@@ -123,9 +123,10 @@ public class Memory {
                 if (words[i].equals("HALT")) {
                     memory[0][i] = "HALT".getBytes();
                     if (parseInSupervisor(lastCommand)) {
-                        addToVm(vm, programName);
+                        if(addToVm(vm, programName) == Constants.NO_MEMORY)
+                            return Constants.NO_MEMORY;
                     } else {
-                        throw new Exception("WTF ARE YOU DOING");
+                        throw new Exception("WHAT ARE YOU DOING");
                     }
                     return Constants.HALT;
                 }
@@ -140,7 +141,7 @@ public class Memory {
         return ret;
     }
 
-    private void addToVm(Vm vm, String programName) {
+    private int addToVm(Vm vm, String programName) {
         byte[][] pagesTable = memory[Test.bytesToInt(Rm.ptr.data)];
         /*if(vm.ptr.blocksUsed == 0) {// if this is first track in the vm, then we need first to assign block in rm
             for (int i = 0; i < 16; i++) {
@@ -164,10 +165,13 @@ public class Memory {
         //int temp = Test.bytesToInt(memory[rmPageTablePtr][Test.bytesToInt(memory[vmPageTablePtr][vm.ptr.blocksUsed])]);
         byte[][] vmPageTable = memory[Test.bytesToInt(memory[rmPageTablePtr][vmPageTablePtr])];
         int freeBlock = getFreeBlock();
+        if(freeBlock == Constants.NO_MEMORY)
+            return Constants.NO_MEMORY;
         vmPageTable[vm.ptr.blocksUsed] = Test.intToBytes(freeBlock, 4);
         //memory[vmPageTablePtr][vm.ptr.blocksUsed] = Test.intToBytes(freeBlock, 4);
         copyBlock(memory[0], memory[freeBlock]);
         vm.ptr.blocksUsed++;
+        return 0;
         //System.out.println(Test.bytesToInt(pagesTable[vm.ptr.blocksUsed - 1]));
     }
 
@@ -185,7 +189,7 @@ public class Memory {
             if (usedBlocks[i] == 0)
                 return i;
         }
-        return 10;// TODO need to implement this
+        return -1;// TODO need to implement this
     }
 
     private int[] getUsed() {
@@ -402,6 +406,111 @@ public class Memory {
     public int getInt(int i, int j) {
         return ByteBuffer.wrap(memory[i][j]).getInt();
     }
+
+    public void showDataSegment(Rm rm, String programName){
+        byte [][] vmDescriptor = rm.getVmDescriptor(programName);
+        if ( vmDescriptor != null ) {
+            int ptrIndex = Test.bytesToInt(vmDescriptor[Constants.VM_PTR_INDEX]);
+            int dsIndex = Test.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
+            int csIndex = Test.bytesToInt(vmDescriptor[Constants.VM_CS_INDEX]);
+            byte[][] rmTable = memory[Test.bytesToInt(Rm.ptr.data)];
+            byte[][] vmTable = memory[Test.bytesToInt(rmTable[ptrIndex])];
+            int lastCommand = 0;
+            for (int i = 0; i < 16; i++) { // pereina vm ptr bloku lentele
+                int vmBlockNumber = Test.bytesToInt(vmTable[i]);
+                if (vmBlockNumber != 0){
+                    for (int j = 0; j < 16; j++){
+                        if (lastCommand == 1) {
+                            ByteBuffer buffer2 = ByteBuffer.wrap(memory[vmBlockNumber][j]);
+                            int t2 = buffer2.getInt();
+                            System.out.print(t2 + " ");
+                            lastCommand = 0;
+                            j++;
+                        } else if (lastCommand == 2) {
+                            String command = new String(memory[vmBlockNumber][j]);
+                            System.out.print(command + " ");
+                            lastCommand = 0;
+                            j++;
+                        }
+                        if (isEqual(vmBlockNumber, j, "DSEG")) {
+                            System.out.print("DSEG ");
+                        } else if (isEqual(vmBlockNumber, j, "DW00")) {
+                            System.out.print("DW00 ");
+                            j++;
+                            if (j < 16) {
+                                ByteBuffer buffer2 = ByteBuffer.wrap(memory[vmBlockNumber][j]);
+                                int t2 = buffer2.getInt();
+                                System.out.print(t2 + " ");
+                            } else
+                                lastCommand = 1;
+
+                        } else if (isEqual(vmBlockNumber, j, "DT00")) {
+                            System.out.print("DT00 ");
+                            j++;
+                            if (j < 16) {
+                                String command = new String(memory[vmBlockNumber][j]);
+                                System.out.print(command + " ");
+                            } else
+                                lastCommand = 2;
+                        } else if (isEqual(vmBlockNumber, j, "CSEG")) {
+                            while (j < 16) {
+                                System.out.print("0000" + " ");
+                                j++;
+                            }
+                            break;
+                        }
+                    }
+                    System.out.println();
+                }
+
+            }
+        }
+    }
+
+    public void showCodeSegment(Rm rm, String programName) {
+        byte [][] vmDescriptor = rm.getVmDescriptor(programName);
+        if ( vmDescriptor != null ) {
+            int ptrIndex = Test.bytesToInt(vmDescriptor[Constants.VM_PTR_INDEX]);
+            int dsIndex = Test.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
+            int csIndex = Test.bytesToInt(vmDescriptor[Constants.VM_CS_INDEX]);
+            byte[][] rmTable = memory[Test.bytesToInt(Rm.ptr.data)];
+            byte[][] vmTable = memory[Test.bytesToInt(rmTable[ptrIndex])];
+            int fullOfDS = csIndex / 16;
+            for (int i = fullOfDS; i < 16; i++) { // pereina vm ptr bloku lentele
+                int vmBlockNumber = Test.bytesToInt(vmTable[i]);
+                if (vmBlockNumber != 0) {
+                    if (i == fullOfDS) {
+                        for (int j = 0; j < csIndex % 16 -1; j++) {
+                            System.out.print("0000 ");
+                        }
+                        System.out.print("CSEG ");
+                        printCSEG(csIndex%16,vmBlockNumber);
+                    } else {
+                        printCSEG(0, vmBlockNumber);
+                    }
+
+                }
+                System.out.println();
+            }
+        }
+    }
+
+    public void printCSEG(int begin, int vmBlockNumber) {
+        for (int j = begin; j < 16; j++){
+            if (isEqual(vmBlockNumber, j, "HALT")) {
+                System.out.print("HALT ");
+                j++;
+                while (j < 16) {
+                    System.out.print("0000 ");
+                    j++;
+                }
+            } else {
+                String command = new String(memory[vmBlockNumber][j]);
+                System.out.print(command + " ");
+            }
+        }
+    }
+
 
     public void showTrackMemory(int blockNumber) {
         int lastCommand = 0;

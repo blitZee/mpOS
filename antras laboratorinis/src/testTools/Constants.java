@@ -18,4 +18,6 @@ public class Constants {
     public final static int VM_SP_INDEX = 5;
     public final static int VM_SF_INDEX = 6;
     public final static int VM_PTR_INDEX = 7;
+
+    public final static int NO_MEMORY = -1;
 }
