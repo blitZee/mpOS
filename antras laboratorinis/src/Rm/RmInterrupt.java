@@ -3,7 +3,7 @@ package Rm;
 /**
  * Created by blitZ on 3/8/2017.
  */
-public class RmInterrupt extends Exception {
+public class RmInterrupt {
     private InterruptType type;
 
     public RmInterrupt(InterruptType type) {

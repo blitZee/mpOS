@@ -56,7 +56,7 @@ public class Vm {
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
         buffer = ByteBuffer.wrap(r2.data);
-        temp = temp + buffer.getInt();
+        temp += buffer.getInt();
         if (temp > Integer.MAX_VALUE) {
             temp -= Integer.MAX_VALUE;
             sf.setCf(1);
@@ -70,10 +70,26 @@ public class Vm {
     }
 
     public void ad(int x, int y) {
-        System.out.println("AD" + x + " " + y);
+        System.out.println("AD " + x + y);
         long temp;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+        try {
+            buffer = ByteBuffer.wrap(getData(x, y));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        temp += buffer.getInt();
+        if (temp > Integer.MAX_VALUE) {
+            temp -= Integer.MAX_VALUE;
+            sf.setCf(1);
+        }
+        buffer = ByteBuffer.allocate(4);
+        buffer.putInt((int) temp);
+        r1.data = buffer.array();
+        if (temp == 0) {
+            sf.setZf(1);
+        }
     }
 
     public void sbrr() {
@@ -82,7 +98,7 @@ public class Vm {
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
         buffer = ByteBuffer.wrap(r2.data);
-        temp = temp - buffer.getInt();
+        temp -= buffer.getInt();
         if (temp < 0) {
             temp += Integer.MAX_VALUE;
             sf.setCf(1);
@@ -96,7 +112,26 @@ public class Vm {
     }
 
     public void sb(int x, int y) {
-        System.out.println("SB" + x + " " + y);
+        System.out.println("SB " + x + y);
+        int temp;
+        ByteBuffer buffer = ByteBuffer.wrap(r1.data);
+        temp = buffer.getInt();
+        try {
+            buffer = ByteBuffer.wrap(getData(x, y));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        temp -= buffer.getInt();
+        if (temp < 0) {
+            temp += Integer.MAX_VALUE;
+            sf.setCf(1);
+        }
+        buffer = ByteBuffer.allocate(4);
+        buffer.putInt(temp);
+        r1.data = buffer.array();
+        if (temp == 0) {
+            sf.setZf(1);
+        }
     }
 
     public void mlrr() {
@@ -118,16 +153,36 @@ public class Vm {
     }
 
     public void ml(int x, int y) {
-        System.out.println("ML" + x + " " + y);
+        System.out.println("ML " + x + y);
+        long temp;
+        ByteBuffer buffer = ByteBuffer.wrap(r1.data);
+        temp = buffer.getInt();
+        try {
+            buffer = ByteBuffer.wrap(getData(x, y));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (temp > Integer.MAX_VALUE) {
+            temp = temp - (Integer.MAX_VALUE * (temp / Integer.MAX_VALUE));
+            sf.setCf(1);
+        }
+        buffer = ByteBuffer.allocate(4);
+        buffer.putInt((int) temp);
+        r1.data = buffer.array();
+        if (temp == 0) {
+            sf.setZf(1);
+        }
+
     }
 
-    public void dvrr() {
+    public void dvrr(){
+        System.out.println("DVRR");
         int temp;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
         buffer = ByteBuffer.wrap(r2.data);
         if (buffer.getInt() == 0) {
-
+            //TODO:set interupt to division by zero
         } else {
             buffer = ByteBuffer.allocate(4);
             buffer.putInt(temp / buffer.getInt());
@@ -141,7 +196,29 @@ public class Vm {
         }
     }
 
-    public void dv(int x, int y) {
+    public void dv(int x, int y){
+        System.out.println("DV " + x + y);
+        int temp;
+        ByteBuffer buffer = ByteBuffer.wrap(r1.data);
+        temp = buffer.getInt();
+        try {
+            buffer = ByteBuffer.wrap(getData(x, y));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (buffer.getInt() == 0) {
+            //TODO:set interupt to division be zero
+        } else {
+            buffer = ByteBuffer.allocate(4);
+            buffer.putInt(temp / buffer.getInt());
+            r1.data = buffer.array();
+            buffer = ByteBuffer.allocate(4);
+            buffer.putInt((int) temp % buffer.getInt());
+            r2.data = buffer.array();
+            if (temp == 0) {
+                sf.setZf(1);
+            }
+        }
 
     }
 
@@ -212,11 +289,23 @@ public class Vm {
     }
 
     public void lw(int x, int y) {
-
+        System.out.println("LW " + x + y);
+        ByteBuffer buffer = null;
+        try {
+            buffer = ByteBuffer.wrap(getData(x, y));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        r1.data = buffer.array();
     }
 
     public void sw(int x, int y) {
-
+        System.out.println("SW " + x + y);
+        try {
+            saveData(x, y);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void mov1() {
@@ -230,7 +319,24 @@ public class Vm {
     }
 
     public void prnt() {
+        ByteBuffer buffer = null;
+        byte[] bytes = null;
+        try {
+            buffer = ByteBuffer.wrap(r2.data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        int length = buffer.getInt();
+
+        for(int i = 0; i < length; i++){
+            try {
+                bytes = getData((r1.getDataInt() + i)/16, (r1.getDataInt() + i)%16);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println(new String(bytes));
+        }
     }
 
     public void prns() {
@@ -283,5 +389,38 @@ public class Vm {
 
     public void halt() {
         System.out.println("HALT");
+    }
+
+    private byte[] getData (int x, int y) throws Exception{
+        byte[][] rmPtrTable = rm.memory.memory[Rm.Rm.ptr.getDataInt()];
+        byte[][] vmPtrTable = rm.memory.memory[Test.bytesToInt(rmPtrTable[ptr.getDataInt()])];
+        byte[][] temp;
+        int pos = (x*16 + y) * 2;
+        if(pos >= cs.getDataInt()){
+            throw new Exception("Gone too deep");
+        }
+        temp = rm.memory.memory[Test.bytesToInt(vmPtrTable[pos/16])];
+
+        return temp[pos%16];
+    }
+
+    private void saveData (int x, int y) throws Exception{
+        byte[][] rmPtrTable = rm.memory.memory[Rm.Rm.ptr.getDataInt()];
+        byte[][] vmPtrTable = rm.memory.memory[Test.bytesToInt(rmPtrTable[ptr.getDataInt()])];
+        int pos = (x*16 + y) * 2;
+        if(pos >= cs.getDataInt()){
+            throw new Exception("Gone too deep");
+        }
+        rm.memory.memory[Test.bytesToInt(vmPtrTable[pos/16])][pos%16] = r1.data;
+    }
+
+    private void saveData (int x, int y, byte[] bytes) throws Exception{
+        byte[][] rmPtrTable = rm.memory.memory[Rm.Rm.ptr.getDataInt()];
+        byte[][] vmPtrTable = rm.memory.memory[Test.bytesToInt(rmPtrTable[ptr.getDataInt()])];
+        int pos = (x*16 + y) * 2;
+        if(pos >= cs.getDataInt()){
+            throw new Exception("Gone too deep");
+        }
+        rm.memory.memory[Test.bytesToInt(vmPtrTable[pos/16])][pos%16] = bytes;
     }
 }

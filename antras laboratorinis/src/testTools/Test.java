@@ -35,9 +35,9 @@ public class Test {
             rm.load(programName);
             rm.showBlock(programName);
             byte[][] descriptor = rm.getVmDescriptor(programName);
-            System.out.println("Vm name: " + new String(descriptor[Constants.VM_NAME_INDEX]));
-            System.out.println("Vm data segment: " + bytesToInt(descriptor[Constants.VM_DS_INDEX]));
-            System.out.println("Vm code segment: " + bytesToInt(descriptor[Constants.VM_CS_INDEX]));
+            System.out.println("vm name: " + new String(descriptor[Constants.VM_NAME_INDEX]));
+            System.out.println("vm data segment: " + bytesToInt(descriptor[Constants.VM_DS_INDEX]));
+            System.out.println("vm code segment: " + bytesToInt(descriptor[Constants.VM_CS_INDEX]));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -21,8 +21,8 @@ public class Rm {
     RmRegister ch2;
     RmRegister ch3;
 
-    RmInterrupt si;
-    RmInterrupt pi;
+    public RmInterrupt si;
+    public RmInterrupt pi;
 
     public HDD hdd;
     public Memory memory;

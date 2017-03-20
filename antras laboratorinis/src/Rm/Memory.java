@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
  * Created by blitZ on 3/8/2017.
  */
 public class Memory {
-    byte[][][] memory;
+    public byte[][][] memory;
     HDD hdd;
     boolean prevDW = false;
     boolean prevDT = false;
@@ -22,9 +22,8 @@ public class Memory {
 
     public Memory(Rm rm) {
         memory = new byte[256][16][4];
-        rm.ptr.data = ByteBuffer.allocate(4).putInt(1).array(); //rm.ptr yra registras, jo data
-        // laukas nustatomas i 1 bloka
-        // Tas laukas rodys i bloka, kuriame yra puslapiu lentele
+        rm.ptr.data = ByteBuffer.allocate(4).putInt(1).array(); //rm.ptr yra registras, jo data laukas nustatomas i 1
+        // bloka. Tas laukas rodys i bloka, kuriame yra puslapiu lentele
         vmList = getFreeBlock();
         byte[][] vmListTable = memory[vmList];
         for(int i = 0; i < 16; i++){
