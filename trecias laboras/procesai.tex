@@ -45,10 +45,11 @@
 			\item \textbf{Loader} - užkrauna procesą iš išorinės atminties į vidinę atmintį. PID - 3.
 			\item \textbf{Chan\_1\_Device} - perrašo duomenis tarp išorinės atminties ir vidinės atminties. PID - 4.
 			\item \textbf{Interrupt} - procesas, kuris, įvykus pertraukimui, jį identifikuoja ir siunčia pranešimą Job\_Governor. PID - 5.
-			\item \textbf{Get\_Put\_Data} - ???.
-			\item \textbf{Print\_Lines} - atspausdina eilutę į ekraną. PID - 7.
-			\item  \textbf{Process\_Killer} - ištrina programą ir jos sukurtus resursus iš vidinės atminties. PID - 8.
-			\item \textbf{Resource\_Manager} - resursų paskirstytojas. PID - 9.
+			\item \textbf{Get\_Put\_Data} - procesas, dirbantis su duomenimis vidinėje atmintyje. PID - 6 .
+			\item \textbf{Chan\_2\_Device} - darbui su įvesties srautais. PID - 7
+			\item \textbf{Chan\_3\_Device} - darbui su išvesties srautais. PID - 8.
+			\item  \textbf{Process\_Killer} - ištrina programą ir jos sukurtus resursus iš vidinės atminties. PID - 9.
+			\item \textbf{Resource\_Manager} - resursų paskirstytojas. PID - 10.
 		\end{itemize}
 	\subsection{Procesų planuotojas (Job\_Governor)}
 		Procesų planuotojas iškviečiamas kiekvieną kartą, kai iššaukiamas timer'io pertraukimas. Taip pat jis gali būti kviečiamas procesui baigus darbą arba jam užsiblokavus. Iškvietus planuotoją, imamas kitas READY būsenos procesas pagal didžiausią prioritetą.
