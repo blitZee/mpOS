@@ -1,7 +1,9 @@
 package vm;
 
+import Rm.InterruptType;
 import testTools.Constants;
 import testTools.Test;
+import utils.OsLogger;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -52,12 +54,24 @@ public class Vm {
     }
 
     public void adrr() {
-        System.out.println("ADRR");
-        long temp;
+        //System.out.println("ADRR");
+        StringBuilder sb = new StringBuilder();
+        long temp, temp2;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: ");
+        sb.append(temp + ", ");
+
         buffer = ByteBuffer.wrap(r2.data);
-        temp += buffer.getInt();
+        temp2 = buffer.getInt();
+
+        sb.append(temp2);
+
+        temp += temp2;
+
+        sb.append("; result: " + temp);
+
         if (temp > Integer.MAX_VALUE) {
             temp -= Integer.MAX_VALUE;
             sf.setCf(1);
@@ -68,19 +82,32 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
+
+        OsLogger.writeToLog("ADRR; " + sb);
     }
 
     public void ad(int x, int y) {
-        System.out.println("AD " + x + y);
-        long temp;
+        StringBuilder sb = new StringBuilder();
+        //System.out.println("AD " + x + y);
+        long temp, temp2;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: ");
+        sb.append(temp + ", ");
+
         try {
             buffer = ByteBuffer.wrap(getData(x, y));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        temp += buffer.getInt();
+        temp2 = buffer.getInt();
+        sb.append(temp2);
+
+        temp += temp2;
+
+        sb.append("; result: " + temp);
+
         if (temp > Integer.MAX_VALUE) {
             temp -= Integer.MAX_VALUE;
             sf.setCf(1);
@@ -91,15 +118,27 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
+        OsLogger.writeToLog("AD " + x + " " + y + "; " + sb);
     }
 
     public void sbrr() {
-        System.out.println("SBRR");
-        int temp;
+        StringBuilder sb = new StringBuilder();
+
+        //System.out.println("SBRR");
+        int temp, temp2;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values ");
+        sb.append(temp + ", ");
+
         buffer = ByteBuffer.wrap(r2.data);
-        temp -= buffer.getInt();
+        temp2 = buffer.getInt();
+        sb.append(temp2);
+
+        temp -= temp2;
+
+        sb.append("; result: " + temp);
         if (temp < 0) {
             temp += Integer.MAX_VALUE;
             sf.setCf(1);
@@ -110,19 +149,28 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
+        OsLogger.writeToLog("SBRR; " + sb);
     }
 
     public void sb(int x, int y) {
-        System.out.println("SB " + x + y);
-        int temp;
+        StringBuilder sb = new StringBuilder();
+        //System.out.println("SB " + x + y);
+        int temp, temp2;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: ");
+        sb.append(temp + ", ");
         try {
             buffer = ByteBuffer.wrap(getData(x, y));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        temp -= buffer.getInt();
+        temp2 = buffer.getInt();
+        temp -= temp2;
+
+        sb.append(temp2);
+        sb.append("; result: " + temp);
         if (temp < 0) {
             temp += Integer.MAX_VALUE;
             sf.setCf(1);
@@ -133,14 +181,26 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
+        OsLogger.writeToLog("SB" + x + " " + y  + "; " + sb);
     }
 
     public void mlrr() {
-        long temp;
+        StringBuilder sb = new StringBuilder();
+        long temp, temp2;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: ");
+        sb.append(temp + ", ");
+
         buffer = ByteBuffer.wrap(r2.data);
-        temp = temp * buffer.getInt();
+        temp2 = buffer.getInt();
+
+        sb.append(temp2);
+
+        temp = temp * temp2;
+
+        sb.append("; result: " + temp);
         if (temp > Integer.MAX_VALUE) {
             temp = temp - (Integer.MAX_VALUE * (temp / Integer.MAX_VALUE));
             sf.setCf(1);
@@ -151,15 +211,27 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
+        OsLogger.writeToLog("MLRR; " + sb);
     }
 
     public void ml(int x, int y) {
-        System.out.println("ML " + x + y);
-        long temp;
+        //System.out.println("ML " + x + y);
+        StringBuilder sb = new StringBuilder();
+        long temp, temp2;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: ");
+        sb.append(temp + ", ");
+
         try {
             buffer = ByteBuffer.wrap(getData(x, y));
+            temp2 = buffer.getInt();
+            temp *= temp2;
+
+            sb.append(temp2);
+            sb.append("; result: "+ temp);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -173,153 +245,279 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
+        OsLogger.writeToLog("ML" + x + " " + y + "; " + sb);
 
     }
 
     public void dvrr(){
-        System.out.println("DVRR");
-        int temp;
+        //System.out.println("DVRR");
+        StringBuilder sb = new StringBuilder();
+        int temp, temp2, temp3;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: ");
+        sb.append(temp + ", ");
+
         buffer = ByteBuffer.wrap(r2.data);
-        if (buffer.getInt() == 0) {
+        temp2 = buffer.getInt();
+
+        sb.append(temp2);
+
+        if (temp2 == 0) {
             //TODO:set interupt to division by zero
         } else {
             buffer = ByteBuffer.allocate(4);
-            buffer.putInt(temp / buffer.getInt());
-            r1.data = buffer.array();
+            buffer.putInt(temp / temp2);
+            temp3 = buffer.getInt();
+
+            sb.append("; result: " + temp3 + ", ");
+
+            r1.data = ByteBuffer.allocate(4).putInt(temp3).array();
             buffer = ByteBuffer.allocate(4);
-            buffer.putInt((int) temp % buffer.getInt());
-            r2.data = buffer.array();
+            buffer.putInt((int) temp % temp2);
+
+            temp3 = buffer.getInt();
+
+            sb.append(temp3);
+
+            r2.data = ByteBuffer.allocate(4).putInt(temp3).array();
             if (temp == 0) {
                 sf.setZf(1);
             }
         }
+
+        OsLogger.writeToLog("DVRR; " + sb);
     }
 
     public void dv(int x, int y){
-        System.out.println("DV " + x + y);
-        int temp;
+        //System.out.println("DV " + x + y);
+        StringBuilder sb = new StringBuilder();
+        int temp, temp2, temp3;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: ");
+        sb.append(temp + ", ");
+
         try {
             buffer = ByteBuffer.wrap(getData(x, y));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (buffer.getInt() == 0) {
-            //TODO:set interupt to division be zero
+
+        temp2 = buffer.getInt();
+
+        sb.append(temp2);
+
+        if (temp2 == 0) {
+            //TODO:set interupt to division by zero
         } else {
-            buffer = ByteBuffer.allocate(4);
-            buffer.putInt(temp / buffer.getInt());
-            r1.data = buffer.array();
-            buffer = ByteBuffer.allocate(4);
-            buffer.putInt((int) temp % buffer.getInt());
-            r2.data = buffer.array();
+            //buffer.clear();
+            //buffer = ByteBuffer.allocate(5);
+            //buffer.putInt(temp / temp2);
+            temp3 = temp / temp2;
+
+            sb.append("; result: " + temp3 + ", ");
+
+            r1.data = ByteBuffer.allocate(4).putInt(temp3).array();
+            //buffer = ByteBuffer.allocate(4);
+            //buffer.putInt((int) temp % temp2);
+
+            temp3 = (int) temp % temp2;
+
+            sb.append(temp3);
+
+            r2.data = ByteBuffer.allocate(4).putInt(temp3).array();
             if (temp == 0) {
                 sf.setZf(1);
             }
         }
 
+        OsLogger.writeToLog("DV" + x + " " + y + "; " + sb);
+
     }
 
     public void and() {
-        int temp;
+        StringBuilder sb = new StringBuilder();
+        int temp, temp2;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: ");
+        sb.append(temp + ", ");
+
         buffer = ByteBuffer.wrap(r2.data);
-        temp = temp & buffer.getInt();
-        buffer.putInt(temp);
-        r1.data = buffer.array();
+        temp2 = buffer.getInt();
+
+        sb.append(temp2);
+
+        temp = temp & temp2;
+
+        sb.append("; result: " + temp);
+
+        //buffer.putInt(temp);
+        r1.data = ByteBuffer.allocate(4).putInt(temp).array();
         if (temp == 0) {
             sf.setZf(1);
         }
+
+        OsLogger.writeToLog("AND: " + sb);
     }
 
     public void or() {
-        int temp;
+        StringBuilder sb = new StringBuilder();
+        int temp, temp2;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: " + temp + ", ");
+
         buffer = ByteBuffer.wrap(r2.data);
-        temp = temp | buffer.getInt();
-        buffer.putInt(temp);
-        r1.data = buffer.array();
+        temp2 = buffer.getInt();
+
+        sb.append(temp2);
+
+        temp = temp | temp2;
+
+        sb.append("; result: " + temp);
+
+//        buffer.putInt(temp);
+        r1.data = ByteBuffer.allocate(4).putInt(temp).array();
         if (temp == 0) {
             sf.setZf(1);
         }
+
+        OsLogger.writeToLog("OS: " + sb);
     }
 
     public void xor() {
-        int temp;
+        StringBuilder sb = new StringBuilder();
+        int temp, temp2;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+
+        sb.append("values: " + temp + ", ");
+
         buffer = ByteBuffer.wrap(r2.data);
-        temp = temp ^ buffer.getInt();
-        buffer.putInt(temp);
-        r1.data = buffer.array();
+        temp2 = buffer.getInt();
+
+        sb.append(temp2);
+
+        temp = temp ^ temp2;
+
+        sb.append("; result: " + temp);
+
+        //buffer.putInt(temp);
+        r1.data = ByteBuffer.allocate(4).putInt(temp).array();
         if (temp == 0) {
             sf.setZf(1);
         }
+
+        OsLogger.writeToLog("XOR: " + sb);
     }
 
     public void not() {
-        int temp;
-        ByteBuffer buffer = ByteBuffer.wrap(r1.data);
-        temp = ~buffer.getInt();
-        buffer.putInt(temp);
-        r1.data = buffer.array();
-        if (temp == 0) {
-            sf.setZf(1);
-        }
-    }
-
-    public void cmp() {
+        StringBuilder sb = new StringBuilder();
         int temp;
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         temp = buffer.getInt();
+        sb.append("value: " + temp);
+
+        temp = ~temp;
+
+        sb.append("; result: " + temp);
+
+//        buffer.putInt(temp);
+        r1.data = ByteBuffer.allocate(4).putInt(temp).array();
+        if (temp == 0) {
+            sf.setZf(1);
+        }
+
+        OsLogger.writeToLog("NOT; " + sb);
+    }
+
+    public void cmp() {
+        StringBuilder sb = new StringBuilder();
+        int temp, temp2;
+        ByteBuffer buffer = ByteBuffer.wrap(r1.data);
+        temp = buffer.getInt();
+
+        sb.append("values: " + temp + ", ");
+
         buffer = ByteBuffer.wrap(r2.data);
-        if (temp < buffer.getInt()) {
+        temp2 = buffer.getInt();
+
+        sb.append(temp2);
+
+        if (temp < temp2) {
+
+            sb.append("; result: lower");
+
             sf.setZf(0);
             sf.setCf(1);
-        } else if (temp > buffer.getInt()) {
+        } else if (temp > temp2) {
+
+            sb.append("; result: higher");
+
             sf.setZf(0);
             sf.setCf(0);
         } else {
+
+            sb.append("; result: equal");
+
             sf.setZf(1);
         }
     }
 
     public void lw(int x, int y) {
-        System.out.println("LW " + x + y);
+        StringBuilder sb = new StringBuilder();
+        //System.out.println("LW " + x + y);
+        int temp = 0;
         ByteBuffer buffer = null;
         try {
             buffer = ByteBuffer.wrap(getData(x, y));
+            temp = buffer.getInt();
+            sb.append("value: " + temp + " or " + new String(Test.intToBytes(temp, 4)));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        r1.data = buffer.array();
+        r1.data = Test.intToBytes(temp, 4);
+
+        OsLogger.writeToLog("LW" + x + " " + y + "; " + sb);
     }
 
     public void sw(int x, int y) {
-        System.out.println("SW " + x + y);
+        StringBuilder sb = new StringBuilder();
+        //System.out.println("SW " + x + y);
+
+        sb.append("register: " + r1.getDataInt() + " or " + new String(r1.data));
+
         try {
             saveData(x, y);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        OsLogger.writeToLog("SW" + x + " " + y + "; " + sb);
     }
 
     public void mov1() {
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         r2.data = buffer.array();
+
+        OsLogger.writeToLog("MOV1; " + "r1: " + r1.getDataInt() + "; r2: " + r2.getDataInt());
     }
 
     public void mov2() {
         ByteBuffer buffer = ByteBuffer.wrap(r2.data);
         r1.data = buffer.array();
+
+        OsLogger.writeToLog("MOV1; " + "r1: " + r1.getDataInt() + "; r2: " + r2.getDataInt());
     }
 
     public void prnt() {
+        StringBuilder sb = new StringBuilder();
         ByteBuffer buffer = null;
         byte[] bytes = null;
         try {
@@ -336,12 +534,17 @@ public class Vm {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            sb.append(bytes);
             System.out.println(new String(bytes));
         }
+
+        OsLogger.writeToLog("PRNT: " + sb);
     }
 
     public void prns() {
         System.out.println(r1.getDataInt());
+
+        OsLogger.writeToLog("PRNS: " + r1.getDataInt());
     }
 
     public void push() {
@@ -354,58 +557,89 @@ public class Vm {
 
     public void jm(int x, int y) {
         ic = 16 * x + y;
+
+        OsLogger.writeToLog("JM" + x + " " + y + "; ic: " + ic);
     }
 
     public void je(int x, int y) {
+        int oldIc = ic;
         if(sf.getZf()){
             ic = 16 * x + y;
         }
+        OsLogger.writeToLog("JE" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic);
     }
 
     public void ja(int x, int y) {
+        int oldIc = ic;
         if(!sf.getCf() && !sf.getZf()){
             ic = 16 * x + y;
         }
+        OsLogger.writeToLog("JA" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic);
     }
 
     public void jl(int x, int y) {
+        int oldIc = ic;
         if(sf.getCf()){
             ic = 16 * x + y;
         }
+        OsLogger.writeToLog("JL" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic);
     }
     public void fo(int x, int y) {
         int pos = rm.getFilePos(x, y, true);
-        r1.data = Test.intToBytes(pos, 4);
+        if(pos >= 0)
+            r1.data = Test.intToBytes(pos, 4);
+        else
+            Rm.Rm.setPI(InterruptType.INCORRECT_FILE_NAME);
+
+        OsLogger.writeToLog("FO; handler: " + r1.getDataInt());
     }
 
     public void fc() {
         rm.closeFile(r1.data);
+        if(r1.getDataInt() < 0){
+            Rm.Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
+        }
+        OsLogger.writeToLog("FC; handler: " + r1.getDataInt());
     }
 
     public void fd() {
-
+        OsLogger.writeToLog("FD; handler: " + r1.getDataInt());
+        if(r1.getDataInt() < 0){
+            Rm.Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
+        } else
+            rm.deleteFile(r1.data);
     }
 
     public void fr(int x, int y) {
         //r2.data = Test.intToBytes(1, 4);
-        rm.fileRead(r1.data, x, y, r2.data, this);
+        if(r1.getDataInt() < 0){
+            Rm.Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
+        } else
+            rm.fileRead(r1.data, x, y, r2.data, this);
+
+        OsLogger.writeToLog("FR" + x + ", " + y + "; handler: " + r1.getDataInt());
     }
 
     public void fw(int x, int y) {
-        try {
-            byte[] data  = getData(x, y);
-            if(r2.getDataInt() < 255)
-                rm.fileWrite(r1.data, data, r2.data);
-            else
-                System.out.println("File is not big enough");
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(r1.getDataInt() < 0){
+            Rm.Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
+        } else {
+            try {
+                byte[] data = getData(x, y);
+                if (r2.getDataInt() < 255)
+                    rm.fileWrite(r1.data, data, r2.data);
+                else
+                    System.out.println("File is not big enough");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-
+        OsLogger.writeToLog("FW" + x + ", " + y + "; handler: " + r1.getDataInt());
     }
 
     public void halt() {
-        System.out.println("HALT");
+        //System.out.println("HALT");
+        OsLogger.writeToLog("HALT");
     }
 
     private byte[] getData(int x, int y) throws Exception {

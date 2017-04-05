@@ -3,6 +3,7 @@ import java.util.Scanner;
 
 import Rm.Rm;
 import testTools.Test;
+import utils.OsLogger;
 
 /**
  * Created by blitZ on 3/8/2017.
@@ -11,6 +12,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+            OsLogger.init("logger.txt");
             Rm rm = new Rm();
             Scanner scanner = new Scanner(System.in);
             boolean work = true;
@@ -23,6 +25,7 @@ public class Main {
                     case "quit": {
                         try {
                             rm.hdd.close();
+                            OsLogger.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -32,10 +35,10 @@ public class Main {
                     case "load": {
                         //rm.load(fileName(inArray), programName(inArray));
                         String programName = programName(inArray);
-                        if(programName != null)
+                        if(programName != null && programName.length() == 2)
                             rm.load(programName);
                         else {
-                            System.out.println("No program name given");
+                            System.out.println("No program name given or incorrect format");
                         }
                         break;
                     }
@@ -48,10 +51,10 @@ public class Main {
                     }
                     case "start": {
                         String programName = programName(inArray);
-                        if(programName != null)
+                        if(programName != null && programName.length() == 2)
                             rm.start(programName);
                         else {
-                            System.out.println("No program name given");
+                            System.out.println("No program name given or incorrect format");
                         }
                         break;
                     }
@@ -133,8 +136,10 @@ public class Main {
 
     private static String programName(String[] array) {
         for (int i = 1; i < array.length; i++) {
-            if (array[i].equals("-p"))
-                return array[i + 1];
+            if (array[i].equals("-p")) {
+                if(array.length > i + 1)
+                    return array[i + 1];
+            }
         }
         return null;
     }

@@ -126,7 +126,7 @@ public class Memory {
                         if(addToVm(vm, programName) == Constants.NO_MEMORY)
                             return Constants.NO_MEMORY;
                     } else {
-                        throw new Exception("WHAT ARE YOU DOING");
+                        throw new Exception("Incorrect code");
                     }
                     return Constants.HALT;
                 }
@@ -135,7 +135,7 @@ public class Memory {
         }
         if (parseInSupervisor(lastCommand))
             addToVm(vm, programName);
-        else throw new Exception("WTF ARE YOU DOING");
+        else throw new Exception("Incorrect code");
 
         //showTrackMemory(Test.bytesToInt(pagesTable[Test.bytesToInt(vm.ptr.data)]));
         return ret;
@@ -348,15 +348,15 @@ public class Memory {
                 case "HALT":
                     temp.value = Constants.HALT;
                     return true;
-                case "AND":
+                case "AND0":
                     return true;
-                case "OR":
+                case "OR00":
                     return true;
-                case "XOR":
+                case "XOR0":
                     return true;
-                case "NOT":
+                case "NOT0":
                     return true;
-                case "CMP":
+                case "CMP0":
                     return true;
                 case "MOV1":
                     return true;

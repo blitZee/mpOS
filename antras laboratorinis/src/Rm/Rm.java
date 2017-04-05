@@ -4,6 +4,7 @@ import com.sun.org.apache.xpath.internal.SourceTree;
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import testTools.Constants;
 import testTools.Test;
+import utils.OsLogger;
 import vm.Vm;
 
 import java.io.*;
@@ -14,7 +15,7 @@ import java.util.Scanner;
  * Created by blitZ on 3/8/2017.
  */
 public class Rm {
-    public static boolean stepMode = true;
+    public static boolean stepMode = false;
 
     RmRegister mode;
     public static RmRegister ptr;
@@ -25,8 +26,8 @@ public class Rm {
     RmRegister ch2;
     RmRegister ch3;
 
-    RmInterrupt si;
-    RmInterrupt pi;
+    static RmInterrupt si;
+    static RmInterrupt pi;
 
     public HDD hdd;
     public Memory memory;
@@ -46,8 +47,8 @@ public class Rm {
         ch1 = new RmRegister(1, "channel 1");
         ch2 = new RmRegister(1, "channel 2");
         ch3 = new RmRegister(1, "channel 3");
-        si = new RmInterrupt(InterruptType.NO_INTERUPT);
-        pi = new RmInterrupt(InterruptType.NO_INTERUPT);
+        si = new RmInterrupt(InterruptType.NO_INTERRUPT);
+        pi = new RmInterrupt(InterruptType.NO_INTERRUPT);
         sf = new RmStatusFlag();
         ic = 0;
         ti = 10;
@@ -58,7 +59,8 @@ public class Rm {
     public void start(String programName) {
         byte[][] vmDescriptor = getVmDescriptor(programName);
         if (vmDescriptor == null) {
-            System.out.println("No such program");
+            //System.out.println("No such program");
+            OsLogger.writeToLog("No program named " + programName + " to start");
             return;
         }
         Scanner scanner = new Scanner(System.in);
@@ -106,14 +108,18 @@ public class Rm {
 
     public void load(String programName) throws Exception {
         if (getVmDescriptor(programName) != null) {
-            System.out.println("Program with this name already exists");
+            setSI(InterruptType.DUPLICATE_NAME);
+            //System.out.println("Program with this name already exists");
+            OsLogger.writeToLog("There already is program loaded with this name " + programName);
             return;
         }
 
         int ret = 0;
         int vmPtr = getVmPtr();// assign space in rm ptr. Value can be from 0 to 15
         if (vmPtr == -1) {
-            System.out.println("Out of space to add vm to pages table");
+            setSI(InterruptType.OUT_OF_MEMORY);
+            //System.out.println("Out of space to add vm to pages table");
+            OsLogger.writeToLog("Out of space to add vm to pages table, vm name is " + programName);
             return;
         }
         Vm vm = new Vm(this);// create vm only after we know that there are enough space in rm ptr
@@ -123,7 +129,9 @@ public class Rm {
         try {
             long pos = findFilePos(programName);
             if(pos < 0) {
-                System.out.println("No such program");
+                setSI(InterruptType.INCORRECT_FILE_NAME);
+                //System.out.println("No such program");
+                OsLogger.writeToLog("No program named " + programName);
                 return;
             }
             while (true) {
@@ -132,22 +140,28 @@ public class Rm {
                 if (ret == Constants.HALT)
                     break;
                 else if(ret == Constants.NO_MEMORY){
-                    System.out.println("No memory");
-                    removeVm(vm);
+                    setSI(InterruptType.OUT_OF_MEMORY);
+                    //System.out.println("No memory");
+                    OsLogger.writeToLog("No memory for vm, named " + programName);
+                    removeVm(vm);// TODO: This needs to be processed in interrupt
                 }
             }
         } catch (IOException e) {
-            //removeVm(vm);
+            removeVm(vm);
             //System.out.println("Removed vm");
             System.out.println("IO Exception");
             // e.printStackTrace();
         } catch (Exception e) {
-            removeVm(vm);
-            System.out.println("Removed vm");
-            System.out.println("Incorrect code");
+            setPI(InterruptType.UNDEFINED_OPERATION_WHILE_LOADING);
+            removeVm(vm);// TODO: This needs to be processed in interrupt
+            OsLogger.writeToLog("Removed vm named " + programName + ", because of incorrect code");
+
+            //System.out.println("Removed vm");
+            //System.out.println("Incorrect code");
             return;
         }
-        System.out.println("Load ended");
+        //System.out.println("Load ended");
+        OsLogger.writeToLog("Load for program " + programName + " ended");
         //now add to vm list
         byte[][] vmListTable = memory.memory[memory.vmList];
         byte[][] vmDescriptor = memory.memory[Test.bytesToInt(vmListTable[vm.ptr.getDataInt()])];
@@ -219,6 +233,9 @@ public class Rm {
                 counter++;
                 if (counter % 16 == 0) {
                     hdd.file.read(word, 0, 1);
+                }
+                if(counter > 256){
+                    return -1;
                 }
             }
             hdd.file.seek(1296);
@@ -333,6 +350,35 @@ public class Rm {
             hdd.file.write(data);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void deleteFile(byte[] dr1){
+        int hndl = Test.bytesToInt(dr1);
+        byte[] word = new byte[5];
+        int counter = 0;
+        try {
+            hdd.file.seek(0);
+
+            for(int i = 0; i < hndl; i++) {
+                hdd.file.read(word, 0, 5);
+                counter++;
+                if (counter % 16 == 0) {
+                    hdd.file.read(word, 0, 1);
+                }
+            }
+            hdd.file.write("0000".getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        goToFilePosition(Test.bytesToInt(dr1));
+        byte[] newLine = "0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000\r\n".getBytes();
+        for(int i = 0; i < 16; i++){
+            try {
+                hdd.file.write(newLine);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -560,11 +606,13 @@ public class Rm {
 
     private void showRegister(Vm vm){
         int numOfSpaces = 11;
+        byte[][] realTable = memory.memory[ptr.getDataInt()];
+        int vmPtr = Test.bytesToInt(realTable[vm.ptr.getDataInt()]);
         System.out.println("REGISTERS: PTR         R1         R2         DS         CS         TI         IC");
         System.out.println(String.format("   %" + numOfSpaces + "s" + "%" + numOfSpaces + "s" +"%" + numOfSpaces + "s"
                         +"%" + numOfSpaces + "s" +"%" + numOfSpaces + "s"  +"%" + numOfSpaces + "s"
                         +"%" + numOfSpaces + "s",
-                String.valueOf(vm.ptr.getDataInt()),
+                String.valueOf(vmPtr),
                 String.valueOf(vm.r1.getDataInt()),
                 String.valueOf(vm.r2.getDataInt()),
                 String.valueOf(vm.ds.getDataInt()),
@@ -573,20 +621,46 @@ public class Rm {
                 vm.ic));
     }
     private void test(Vm vm){
-        if(si.type != InterruptType.NO_INTERUPT){
+        if(si.type != InterruptType.NO_INTERRUPT){
             System.out.println("System interrupt");
         }
-        if(pi.type != InterruptType.NO_INTERUPT){
+        if(pi.type != InterruptType.NO_INTERRUPT){
             System.out.println("Program interrupt");
         }
         if(timer == 0){
             System.out.println("Timer interupt");
             timer = 10;
         }
+        if(si.type == InterruptType.DUPLICATE_NAME){
+            System.out.println("Interrupt: Duplicate name");
+            OsLogger.writeToLog("Interrupt: Duplicate name");
+        }
+        if(si.type == InterruptType.INCORRECT_FILE_NAME){
+            System.out.println("Interrupt: Incorrect file name");
+            OsLogger.writeToLog("Interrupt: Incorrect file name");
+        }
+        if(si.type == InterruptType.OUT_OF_MEMORY){
+            System.out.println("Interrupt: Out of memory");
+            OsLogger.writeToLog("Interrupt: Out of memory");
+            // TODO: remove vm
+        }
+        if(si.type == InterruptType.UNDEFINED_OPERATION_WHILE_LOADING){
+            System.out.println("Interrupt: Undefined operation while loading");
+            OsLogger.writeToLog("Interrupt: Undefined operation while loading");
+            // TODO: remove vm
+        }
+        if(pi.type == InterruptType.INCORRECT_FILE_HANLDE){
+            System.out.println("Interrupt: Incorrect file handle");
+            OsLogger.writeToLog("Interrupt: Incorrect file handle");
+        }
     }
 
-    public void setSI(InterruptType interupt){
+    public static void setSI(InterruptType interupt){
         si.type = interupt;
+    }
+
+    public static void setPI(InterruptType interrupt){
+        pi.type = interrupt;
     }
 
     private boolean namesEqual(byte[] arr1, byte[] arr2){
