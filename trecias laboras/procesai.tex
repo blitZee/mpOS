@@ -18,8 +18,10 @@
 			\item BLOCKED-STOPPED -> READY-STOPPED - gauna resursą, tačiau procesas vis dar sustabdytas.
 			\item BLOCKED-STOPPED -> BLOCKED - einamasis procesas "nuima" būseną sustabdytas, tačiau jam vis dar reikia resurso.
 		\end{enumerate}
+		\includegraphics[scale=0.75]{ProcessState.png}
 	\subsection{Proceso deskriptorius}
 		\begin{itemize}
+			\item ID - proceso išorinis vardas.
 			\item PID - proceso vidinis vardas.
 			\item PPID - proceso tėvo vidinis vardas.
 			\item STATE - proceso būsena.
@@ -36,21 +38,39 @@
 			\item  \textbf{Resursų sąrašas} - nurodomas resurso vidinis vardas.
 		\end{enumerate}
 	\subsection{Prioritetų sudarymo tvarka}
-		Prioritetų reikšmės bus skiriamos nuo 0 iki 100. Sisteminiai procesai turės didesnį prioritetą, nei vartotojo. Kiekvieną kartą procesui gavus procesorių, jo prioritetas sumažinamas vienetu. /*ar yra apatinės ribos sisteminiams procesams?*/ Vartotojas turi galimybę nustatyti prioriteto reikšmę rankiniu būdu (load funkcijos metu).
+		Prioritetų reikšmės bus skiriamos nuo 0 iki 100. Sisteminiai procesai turės didesnį prioritetą, nei vartotojo. Kiekvieną kartą procesui gavus procesorių, jo prioritetas sumažinamas vienetu. Vartotojas turi galimybę nustatyti prioriteto reikšmę rankiniu būdu (load funkcijos metu).
 	\subsection{Sisteminiai procesai}
 		Sisteminiai procesai sukuriami paleidžiant sistemą, o sunaikinami tik sistemai baigus darbą. Jie yra pasiruošę dirbti visą sistemos gyvavimo laiką. 
-		\begin{itemize}
-			\item \textbf{Start\_Stop} - Visų procesų tėvinis procesas; kuria ir naikina sisteminius procesus ir resursus. Visalaiką užsiblokavęs, kol dirba OS. PID - 1.
-			\item \textbf{Job\_Governor} - procesų paskirstytojas, tvarkantis virtualių mašinų darbą. PID - 2.
-			\item \textbf{Loader} - užkrauna procesą iš išorinės atminties į vidinę atmintį. PID - 3.
-			\item \textbf{Chan\_1\_Device} - perrašo duomenis tarp išorinės atminties ir vidinės atminties. PID - 4.
-			\item \textbf{Interrupt} - procesas, kuris, įvykus pertraukimui, jį identifikuoja ir siunčia pranešimą Job\_Governor. PID - 5.
-			\item \textbf{Get\_Put\_Data} - procesas, dirbantis su duomenimis vidinėje atmintyje. PID - 6 .
-			\item \textbf{Chan\_2\_Device} - darbui su įvesties srautais. PID - 7
-			\item \textbf{Chan\_3\_Device} - darbui su išvesties srautais. PID - 8.
-			\item  \textbf{Process\_Killer} - ištrina programą ir jos sukurtus resursus iš vidinės atminties. PID - 9.
-			\item \textbf{Resource\_Manager} - resursų paskirstytojas. PID - 10.
-		\end{itemize}
+	
+		\begin{tabular}{|p{1cm} | *{2}{p{3.4cm} |} p{7.5cm} |}
+				\hline
+				ID	& Pavadinimas		& Prioritetas	& Aprašymas\\
+				\hline
+				1	& Start\_Stop		& 100			& Visų procesų tėvinis procesas; kuria ir naikina sisteminius procesus ir resursus. Visalaiką užsiblokavęs, kol dirba OS\\
+				\hline
+				2	& Job\_Governor		& 99			& Procesų paskirstytojas, tvarkantis virtualių mašinų darbą.\\
+				\hline
+				3	& Loader			& 96			& Užkrauna procesą iš išorinės atminties į vidinę atmintį.\\
+				\hline
+				4	& Chan\_1\_Device	& 90			& Perrašo duomenis tarp išorinės atminties ir vidinės atminties.\\
+				\hline
+				5	& Interrupt			& 98			& Procesas, kuris, įvykus pertraukimui, jį identifikuoja ir siunčia pranešimą Job\_Governor.\\
+				\hline
+				6	& Get\_Put\_Data	& 85			& Procesas, dirbantis su duomenimis vidinėje atmintyje.\\
+				\hline
+				7	& Chan\_2\_Device	& 70			& Darbui su įvesties srautais.\\
+				\hline
+				8	& Chan\_3\_Device	& 65			& Darbui su išvesties srautais.\\
+				\hline
+				9	& Process\_Killer	& 89			& Ištrina programą ir jos sukurtus resursus iš vidinės atminties.\\
+				\hline
+				10	& Resource\_Manager	& 93			& Resursų paskirstytojas.\\
+				\hline
+				11	& JCL				& 69 			& \textbf{J}ob \textbf{C}ontrol \textbf{L}anguage procesas gauna blokus iš Chan\_2\_Device ir peržiūri, ar programos kodo struktūra yra korektiška; jei taip, perduoda programos blokų sąrašą Chan\_1\_Device.\\
+				\hline
+				12	& VM				& 50			& Procesas, skirtas vykdyti vartotojo programą tol, kol aptinkamas pertraukimas.\\
+				\hline
+		\end{tabular}
 	\subsection{Procesų planuotojas (Job\_Governor)}
 		Procesų planuotojas iškviečiamas kiekvieną kartą, kai iššaukiamas timer'io pertraukimas. Taip pat jis gali būti kviečiamas procesui baigus darbą arba jam užsiblokavus. Iškvietus planuotoją, imamas kitas READY būsenos procesas pagal didžiausią prioritetą.
 	\subsection{Procesų planuotojo primityvai}

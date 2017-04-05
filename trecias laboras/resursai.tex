@@ -6,7 +6,6 @@
 			\item \textbf{PROC} - sąrašas procesų, kurie prašė šio resurso.
 			\item \textbf{STATE} - resurso būsena.
 			\item \textbf{PID} - procesas, sukūręs resursą.
-			\item \textbf{CONTENT} - ???Pasiklausti???.
 			\textbf{}
 		\end{enumerate}
 	\subsection{Resursų tipai ir magic number}
@@ -14,12 +13,49 @@
 		(INT) - resursą norima sukurti dėl programinio arba supervizorinio pertraukimo, tačiau ne dėl timer'io pertraukimo.
 		(USER) - vartotojiškas procesas.
 		
-		Resursų tipai, jų aprašymai, susiję procesai ir šių resursų MagicNumber (nurodomas kaip numeris sąraše):
+		Resursų tipai, jų aprašymai, susiję procesai ir šių resursų MagicNumber (nurodomas kaip numeris sąraše):\\
+		
+		\begin{tabular}{| p{1,5cm} |*{3} {p{2,8cm} |} p{5cm}|}
+			\hline
+			Magic Number	& Pavadinimas	& Laukiantysis Procesas	& Kuriantysis Procesas	& Aprašymas\\
+			\hline
+			1 				& OSExit		& Start\_Stop			& ProcessKiller			& OS darbo baigimas.\\
+			\hline
+			2				& ReadBlock		& Get\_Put\_Data		& (bet koks)			& Blokas, esantis atmintyje, įrašomas į duomenų segmentą.\\
+			\hline
+			3				& WriteBlock	& Get\_Put\_Data		& (bet koks)			& Blokas, esantis duomenų segmente, įrašomas į  vietą, nurodytą atmintyje.\\
+			\hline
+			4				& ReadWord		& Get\_Put\_Data		& (bet koks)			& Žodis, esantis atmintyje, įrašomas į duomenų segmentą.\\	
+			\hline
+			5				& WriteWord		& Get\_Put\_Data		& (bet koks)			& Žodis, esantis duomenų segmente, įrašomas į vietą, nurodytą atmintyje.\\
+			\hline
+			6				& NeedInput		& Chan\_2\_Device		& (INT)					& Įvedimo srautas iš vartotojo.\\
+			\hline
+			7				& NeedOutput	& Chan\_3\_Device		& (INT)					& Išvedimo srautas į ekraną.\\
+			\hline
+			8				& ReadFile		& Chan\_1\_Device		& (INT)					& Failo nuskaitymas.\\
+			\hline
+			9				& OpenFile		& Chan\_1\_Device		& (INT)					& Failo atidarymas.\\
+			\hline
+			10				& WriteFile		& Chan\_1\_Device		& (INT)					& Rašymas į failą.\\
+			\hline
+			11				& CloseFile		& Chan\_1\_Device		& (INT)					& Failo uždarymas.\\
+			\hline
+			12				& DeleteFile	& Chan\_1\_Device		& (INT)					& Failo ištrinimas pagal nurodytą deskriptorių.\\
+			\hline
+			13				& SeekFile		& Chan\_1\_Device		& (INT)					& Pozicijos faile pakeitimas.\\
+			\hline
+			14				& ProgramStart	& Loader				& (INT)					& Programos pakrovimas į atmintį.\\
+			\hline
+			15				& ProgramHalt	& ProcessKiller			& (INT)					& Programos sustabdymas.\\
+			\hline
+			
+		\end{tabular}
 		
 		\begin{enumerate}
 			\item \textbf{OSExit} - OS darbo baigimas. Laukia Start\_Stop procesas, kuria - ProcessKiller. \\
 			
-			\textbf{Resursai, skirti darbui su vidine atmintimi}: Kuriantys procesai gali būti bet kokie, o laukiantis - visada Get\_Put\_data.
+			\textbf{Resursai, skirti darbui su vidine atmintimi}: Kuriantys procesai gali būti bet kokie, o laukiantis - visada Get\_Put\_Data.
 			
 			\item \textbf{ReadBlock} - Blokas, esantis atmintyje, atmintyje, įrašomas į duomenų segmentą.
 			\item \textbf{WriteBlock} - Blokas, esantis duomenų segmente, įrašomas į vietą, nurodytą atmintyje.
