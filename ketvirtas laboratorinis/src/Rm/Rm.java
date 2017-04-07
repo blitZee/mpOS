@@ -19,7 +19,6 @@ public class Rm {
 
     RmRegister mode;
     public static RmRegister ptr;
-    RmRegister sp;
     RmRegister r1;
     RmRegister r2;
     RmRegister ch1;
@@ -41,7 +40,6 @@ public class Rm {
     public Rm() {
         mode = new RmRegister(1, "mode");
         ptr = new RmRegister(2, "ptr");
-        sp = new RmRegister(1, "sp");
         r1 = new RmRegister(4, "register 1");
         r2 = new RmRegister(4, "register 2");
         ch1 = new RmRegister(1, "channel 1");
