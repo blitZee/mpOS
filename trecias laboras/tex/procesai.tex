@@ -18,7 +18,7 @@
 			\item BLOCKED-STOPPED -> READY-STOPPED - gauna resursą, tačiau procesas vis dar sustabdytas.
 			\item BLOCKED-STOPPED -> BLOCKED - einamasis procesas "nuima" būseną sustabdytas, tačiau jam vis dar reikia resurso.
 		\end{enumerate}
-		\includegraphics[scale=0.75]{ProcessState.png}
+		\includegraphics[scale=0.75]{kita/ProcessState.png}
 	\subsection{Proceso deskriptorius}
 		\begin{itemize}
 			\item ID - proceso išorinis vardas.
@@ -64,14 +64,60 @@
 				\hline
 				9	& Process\_Killer	& 89			& Ištrina programą ir jos sukurtus resursus iš vidinės atminties.\\
 				\hline
-				10	& Resource\_Manager	& 93			& Resursų paskirstytojas.\\
+				10	& JCL				& 69 			& \textbf{J}ob \textbf{C}ontrol \textbf{L}anguage procesas gauna blokus iš Chan\_2\_Device ir peržiūri, ar programos kodo struktūra yra korektiška; jei taip, perduoda programos blokų sąrašą Chan\_1\_Device.\\
 				\hline
-				11	& JCL				& 69 			& \textbf{J}ob \textbf{C}ontrol \textbf{L}anguage procesas gauna blokus iš Chan\_2\_Device ir peržiūri, ar programos kodo struktūra yra korektiška; jei taip, perduoda programos blokų sąrašą Chan\_1\_Device.\\
-				\hline
-				12	& VM				& 50			& Procesas, skirtas vykdyti vartotojo programą tol, kol aptinkamas pertraukimas.\\
+				11	& VM				& 50			& Procesas, skirtas vykdyti vartotojo programą tol, kol aptinkamas pertraukimas.\\
 				\hline
 		\end{tabular}
-	\subsection{Procesų planuotojas (Job\_Governor)}
+	\subsection{Start\_stop}
+		\begin{center}
+			\includegraphics[scale=0.9]{diagramos/startStop.png}
+		\end{center}
+	\subsection{Job\_Governor}
+		\begin{center}
+			\includegraphics[scale=0.6]{diagramos/jobGovernor.png}
+		\end{center}
+	\subsection{Loader}
+		\begin{center}
+			\includegraphics[scale=0.9]{diagramos/loader.png}
+		\end{center}
+	\subsection{Chan\_1\_Device}
+		\begin{center}
+			\includegraphics[scale=0.9]{diagramos/chan1Device.png}
+		\end{center}
+	\subsection{Interrupt}
+		\begin{center}
+			\includegraphics[scale=0.9]{diagramos/interrupt.png}
+		\end{center}
+	\subsection{Get\_put\_data}
+		\begin{center}
+			\includegraphics[scale=0.7]{diagramos/getPutData.png}
+		\end{center}
+	\subsection{Chan\_2\_Device}
+		\begin{center}
+			\includegraphics[scale=0.9]{diagramos/chan2Device.png}
+		\end{center}
+	\subsection{Chan\_3\_Device}
+		\begin{center}
+			\includegraphics[scale=0.9]{diagramos/chan3Device.png}
+		\end{center}
+	\subsection{Process\_killer}
+		\begin{center}
+			\includegraphics[scale=0.9]{diagramos/processKiller.png}
+		\end{center}
+	\subsection{JCL}
+		\begin{center}
+			\includegraphics[scale=0.4]{diagramos/JCL.png}
+		\end{center}
+	\subsection{VM}
+		\begin{center}
+			\includegraphics[scale=0.9]{diagramos/VM.png}
+		\end{center}
+	\subsection{Main\_proc}
+		\begin{center}
+			\includegraphics[scale=0.7]{diagramos/mainProc.png}
+		\end{center}
+	\subsection{Procesų planuotojas}
 		Procesų planuotojas iškviečiamas kiekvieną kartą, kai iššaukiamas timer'io pertraukimas. Taip pat jis gali būti kviečiamas procesui baigus darbą arba jam užsiblokavus. Iškvietus planuotoją, imamas kitas READY būsenos procesas pagal didžiausią prioritetą.
 	\subsection{Procesų planuotojo primityvai}
 		\begin{enumerate}

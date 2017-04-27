@@ -1,6 +1,6 @@
 \section{Virtualios mašinos modelis}
 	\subsection{Virtualios mašinos schema}
-	\includegraphics{VM.png}
+	\includegraphics{kita/VM15new.png}
 	\subsection{Virtualios mašinos samprata}
 	\textbf{Virtuali mašina} - tai tarsi realios mašinos kopija. Virtuali mašina yra sudaryta iš realios mašinos komponenčių, tokių kaip procesorius, atmintis, įvedimo/išvedimo įrenginiai. Jiems yra suteikiama paprastesnė nei reali vartotojo sąsaja.
 	
@@ -26,7 +26,6 @@
 	\item Nuorodų registrai:
 		\begin{itemize}
 		\item IC - Instruction Counter. Saugoma einamosios komandos žodžio indeksas.
-		\item SP - Stack Pointer. Saugomas steko viršūnės žodžio indeksas.
 		\end{itemize}
 	\item Loginiai registrai:
 		\begin{itemize}
@@ -66,11 +65,6 @@
 		\item MOV2 - į DR1 įdedama DR2 reikšmė.
 		\item PRNT - iškviečiamas pertraukimas, spausdinantis eilutę į ekraną. Eilutės adresas nurodytas registre DR1 viršūnėje, eilutės ilgis nurodytas registre DR2
 		\item PRNS - iškviečiamas pertraukimas, DR1 reikšmę kaip skaičių į ekraną.
-		\end{itemize}
-	\item Darbo su steku komandos
-		\begin{itemize}
-		\item PUSH - steko viršūnės rodyklė padidinama vientu ir į steko viršūnę idedama DR1 reikšmė.
-		\item POP - į DR1 įdedamas žodis esantis steko viršūnėje ir steko virūnės rodyklė sumažinama vienetu.
 		\end{itemize}
 	\item Valdymo perdavimo komandos
 		\begin{itemize}

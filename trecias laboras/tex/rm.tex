@@ -1,7 +1,7 @@
 \section{Realios mašinos modelis}
 	\subsection{Realios mašinos brėžinys}
 	\begin{flushleft}
-	\includegraphics[scale=0.9]{OSv1.png}
+	\includegraphics[scale=0.9]{kita/OS15new.png}
 	\end{flushleft}
 	\subsection{Realios mašinos registrai}
 	\begin{enumerate}
@@ -16,7 +16,6 @@
 		\item OF - overflow flag. Rezultatas netilpo į skaičiaus su ženklu rėžius.
 	\end{itemize}
 	\item PTR - puslapių lentelės registras. Dydis - 2 baitai. Vyresnysis baitas saugo puslapių lentelės bloko numerį, jaunesnysis baitas saugo puslapių lentelės dydį.
-	\item SP - steko rodyklė. Dydis - 1 baitas. Rodo į virtualios mašinos steko viršūnę.
 	\item IC - instrukcijų skaitliukas. Dydis - 1 baitas. Rodo virtualios mašinos einamąją instrukciją.
 	\item C - loginis trigeris. Dydis - 1 baitas. 0 yra false, visa kita yra true.
 	\item R1, R2 - bendros paskirties registrai. Dydis - po 4 baitus. Skirti atlikti komandoms.
@@ -96,8 +95,6 @@
 	Kitų blokų struktūra:
 	\begin{itemize}
 	\item Pirmasis žodis yra specialus ženklas susidedantis iš keturių dolerių(\$\$\$\$).%subject to change
-	\item Antrasis žodis yra toks pat, kaip ir šį bloką aprašantis žodis, esantis pimajame bloke.%Tikėkimes neužmiršima wtf is this.
-	(Pvz: Jei esame trečiajame bloke, tada šio bloko antrasis žodis sutampa su pirmojo bloko trečiuoju).
 	\item Visi kiti žodžiai skirti duomenims.
 	\end{itemize}
 \clearpage
