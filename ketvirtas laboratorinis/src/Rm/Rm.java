@@ -1,9 +1,7 @@
 package Rm;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import testTools.Constants;
-import testTools.Test;
+import utils.Utils;
 import utils.OsLogger;
 import vm.Vm;
 
@@ -119,9 +117,9 @@ public class Rm {
             return;
         }
         Vm vm = new Vm(this);// create vm only after we know that there are enough space in rm ptr
-        byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
-        vm.ptr.data = Test.intToBytes(vmPtr, 4);
-        rmTable[vmPtr] = Test.intToBytes(memory.getFreeBlock(), 4);
+        byte[][] rmTable = memory.memory[Utils.bytesToInt(Rm.ptr.data)];
+        vm.ptr.data = Utils.intToBytes(vmPtr, 4);
+        rmTable[vmPtr] = Utils.intToBytes(memory.getFreeBlock(), 4);
         try {
             long pos = findFilePos(programName);
             if(pos < 0) {
@@ -152,7 +150,7 @@ public class Rm {
         }
         OsLogger.writeToLog("Load for program " + programName + " ended");
         byte[][] vmListTable = memory.memory[memory.vmList];
-        byte[][] vmDescriptor = memory.memory[Test.bytesToInt(vmListTable[vm.ptr.getDataInt()])];
+        byte[][] vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[vm.ptr.getDataInt()])];
         vmDescriptor[Constants.VM_NAME_INDEX] = programName.getBytes();
         vmDescriptor[Constants.VM_CS_INDEX] = vm.cs.data;
         vmDescriptor[Constants.VM_DS_INDEX] = vm.ds.data;
@@ -199,6 +197,8 @@ public class Rm {
             while (true) {
                 hdd.file.read(word, 0, 5);
                 if (pName[0] == word[0] && pName[1] == word[1]) {
+                    if(word[2] == '1')
+                        return -1;
                     hdd.file.seek(hdd.file.getFilePointer() - 3);
                     hdd.file.writeByte('1');
                     break;
@@ -222,7 +222,8 @@ public class Rm {
 
     public void closeFile(byte[] handler){
         byte[] word = new byte[5];
-        int hndl = Test.bytesToInt(handler);
+        byte[] temp = {0, 0, handler[2], handler[3]};
+        int hndl = Utils.bytesToInt(temp);
         int counter = 0;
         try {
             hdd.file.seek(0);
@@ -241,11 +242,12 @@ public class Rm {
 
     }
 
-    public void fileRead(byte[] dr1, int x, int y, byte[] dr2, Vm vm){
+    public byte[] fileRead(byte[] dr1){
         //DR1 - file handler
         // 10*x + y - vieta, i kuria rasysim duomenu segmente
         //DR2 - adresas is kurio skaitysim
-        int dr1Int = ByteBuffer.wrap(dr1).getInt();
+        byte[] temp1 = {0, 0, dr1[2], dr1[3]};
+        int dr1Int = ByteBuffer.wrap(temp1).getInt();
         try {
             hdd.file.seek(1296);
         } catch (IOException e) {
@@ -254,7 +256,8 @@ public class Rm {
         goToFilePosition(dr1Int);
         try {
             byte[] temp = new byte[5];
-            int readPosition = Test.bytesToInt(dr2);
+            byte[] temp2 = {0, 0, dr1[0], dr1[1]};
+            int readPosition = Utils.bytesToInt(temp2);
             for(int i = 0; i < readPosition; i++){
                 if((i + 1) % 16 == 0)
                     hdd.file.readByte();
@@ -267,13 +270,14 @@ public class Rm {
         try {
             hdd.file.read(word, 0, 4);
             try {
-                vm.saveData(x, y, word);
+                //vm.saveData(x, y, word);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return word;
     }
 
     private void goToFilePosition(int handler){
@@ -294,11 +298,13 @@ public class Rm {
             e.printStackTrace();
         }
     }
-    public void fileWrite(byte[] dr1, byte[] data, byte[] dr2){
-        goToFilePosition(Test.bytesToInt(dr1));
+    public void fileWrite(byte[] dr1, byte[] data){
+        byte[] filePos = {0, 0, dr1[2], dr1[3]};
+        byte[] positionToWrite = {0, 0, dr1[0], dr1[1]};
+        goToFilePosition(Utils.bytesToInt(filePos));
         try {
             byte[] temp = new byte[5];
-            int writePosition = Test.bytesToInt(dr2);
+            int writePosition = Utils.bytesToInt(positionToWrite);
             for(int i = 0; i < writePosition; i++){
                 if((i + 1) % 16 == 0)
                     hdd.file.readByte();
@@ -311,7 +317,7 @@ public class Rm {
     }
 
     public void deleteFile(byte[] dr1){
-        int hndl = Test.bytesToInt(dr1);
+        int hndl = Utils.bytesToInt(dr1);
         byte[] word = new byte[5];
         int counter = 0;
         try {
@@ -328,7 +334,7 @@ public class Rm {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        goToFilePosition(Test.bytesToInt(dr1));
+        goToFilePosition(Utils.bytesToInt(dr1));
         byte[] newLine = "0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000\r\n".getBytes();
         for(int i = 0; i < 16; i++){
             try {
@@ -340,10 +346,10 @@ public class Rm {
     }
 
     private int getVmPtr() {
-        byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
+        byte[][] rmTable = memory.memory[Utils.bytesToInt(Rm.ptr.data)];
         int vmPtr = -1;
         for (int i = 0; i < 16; i++) {
-            if (Test.bytesToInt(rmTable[i]) == 0) {
+            if (Utils.bytesToInt(rmTable[i]) == 0) {
                 vmPtr = i;
                 break;
             }
@@ -355,10 +361,10 @@ public class Rm {
         byte[][] vmListTable = memory.memory[memory.vmList];
         byte[][] vmDescriptor;
         for(int i = 0; i < 16; i++){
-            vmDescriptor = memory.memory[Test.bytesToInt(vmListTable[i])];
+            vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[i])];
             if(namesEqual(vmDescriptor[Constants.VM_NAME_INDEX], programName.getBytes()))
             {
-                byte[][] rmTable = memory.memory[Test.bytesToInt(Rm.ptr.data)];
+                byte[][] rmTable = memory.memory[Utils.bytesToInt(Rm.ptr.data)];
                 memory.showTrackMemory(ByteBuffer.wrap(rmTable[i]).getInt());
                 break;
             }
@@ -377,7 +383,7 @@ public class Rm {
         byte[][] vmListTable = memory.memory[memory.vmList];
         byte[][] vmDescriptor;
         for(int i = 0; i < 16; i++){
-            vmDescriptor = memory.memory[Test.bytesToInt(vmListTable[i])];
+            vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[i])];
             if(namesEqual(vmDescriptor[Constants.VM_NAME_INDEX], programName.getBytes()))
             {
                 return vmDescriptor;
@@ -387,51 +393,51 @@ public class Rm {
     }
 
     private void removeVm(Vm vm) {
-        int rmPtr = Test.bytesToInt(Rm.ptr.data);
+        int rmPtr = Utils.bytesToInt(Rm.ptr.data);
         byte[][] rmPtrTable = memory.memory[rmPtr];
-        int vmPtr = Test.bytesToInt(vm.ptr.data);
-        byte[][] vmPtrTable = memory.memory[Test.bytesToInt(rmPtrTable[vmPtr])];
-        rmPtrTable[vmPtr] = Test.intToBytes(0, 4);
+        int vmPtr = Utils.bytesToInt(vm.ptr.data);
+        byte[][] vmPtrTable = memory.memory[Utils.bytesToInt(rmPtrTable[vmPtr])];
+        rmPtrTable[vmPtr] = Utils.intToBytes(0, 4);
         for (int i = 0; i < 16; i++) {
-            byte[][] track = memory.memory[Test.bytesToInt(vmPtrTable[i])];
-            vmPtrTable[i] = Test.intToBytes(0, 4);
+            byte[][] track = memory.memory[Utils.bytesToInt(vmPtrTable[i])];
+            vmPtrTable[i] = Utils.intToBytes(0, 4);
             for (int j = 0; j < 16; j++) {
-                track[j] = Test.intToBytes(0, 4);
+                track[j] = Utils.intToBytes(0, 4);
             }
         }
         byte[][] vmListTable = memory.memory[memory.vmList];
-        byte[][] vmDescriptor = memory.memory[Test.bytesToInt(vmListTable[vm.ptr.getDataInt()])];
+        byte[][] vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[vm.ptr.getDataInt()])];
         for(int i = 0; i < 16; i++){
-            vmDescriptor[i] = Test.intToBytes(0, 4);
+            vmDescriptor[i] = Utils.intToBytes(0, 4);
         }
     }
 
     public void removeVm(String programName){
-        int rmPtr = Test.bytesToInt(Rm.ptr.data);
+        int rmPtr = Utils.bytesToInt(Rm.ptr.data);
         byte[][] rmPtrTable = memory.memory[rmPtr];
         byte[][] descriptor = getVmDescriptor(programName);
         if(descriptor == null){
             System.out.println("No such program");
             return;
         }
-        int vmPtr = Test.bytesToInt(descriptor[Constants.VM_PTR_INDEX]);
-        byte[][] vmPtrTable = memory.memory[Test.bytesToInt(rmPtrTable[vmPtr])];
-        rmPtrTable[vmPtr] = Test.intToBytes(0, 4);
+        int vmPtr = Utils.bytesToInt(descriptor[Constants.VM_PTR_INDEX]);
+        byte[][] vmPtrTable = memory.memory[Utils.bytesToInt(rmPtrTable[vmPtr])];
+        rmPtrTable[vmPtr] = Utils.intToBytes(0, 4);
         for (int i = 0; i < 16; i++) {
-            byte[][] track = memory.memory[Test.bytesToInt(vmPtrTable[i])];
-            vmPtrTable[i] = Test.intToBytes(0, 4);
+            byte[][] track = memory.memory[Utils.bytesToInt(vmPtrTable[i])];
+            vmPtrTable[i] = Utils.intToBytes(0, 4);
             for (int j = 0; j < 16; j++) {
-                track[j] = Test.intToBytes(0, 4);
+                track[j] = Utils.intToBytes(0, 4);
             }
         }
         for(int i = 0; i < 16; i++){
-            descriptor[i] = Test.intToBytes(0, 4);
+            descriptor[i] = Utils.intToBytes(0, 4);
         }
 
     }
 
     private int[] getCodeBeginning(Vm vm){
-        int temp = Test.bytesToInt(vm.cs.data);
+        int temp = Utils.bytesToInt(vm.cs.data);
         int[] ret = new int[2];
         ret[0] = temp / 16;// row
         ret[1] = temp % 16;// column
@@ -441,14 +447,14 @@ public class Rm {
     private byte[] getCommand(Vm vm, int row, int col){
         byte[] ret;
         byte[][] rmPtrTable = memory.memory[ptr.getDataInt()];
-        byte[][] vmPtrTable = memory.memory[Test.bytesToInt(rmPtrTable[vm.ptr.getDataInt()])];
-        byte[][] rowInTable = memory.memory[Test.bytesToInt(vmPtrTable[row])];
+        byte[][] vmPtrTable = memory.memory[Utils.bytesToInt(rmPtrTable[vm.ptr.getDataInt()])];
+        byte[][] rowInTable = memory.memory[Utils.bytesToInt(vmPtrTable[row])];
         ret = rowInTable[col];
         return ret;
     }
 
     private int[] getNextIndexes(Vm vm){
-        int temp = Test.bytesToInt(vm.cs.data) + vm.ic;
+        int temp = Utils.bytesToInt(vm.cs.data) + vm.ic;
         int[] ret = new int[2];
         ret[0] = temp / 16;// row
         ret[1] = temp % 16;// column
@@ -508,43 +514,43 @@ public class Rm {
         }
         switch (cmd.substring(0, 2)){
             case "AD":
-                vm.ad(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.ad(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "SB":
-                vm.sb(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.sb(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "ML":
-                vm.ml(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.ml(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "DV":
-                vm.dv(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.dv(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "LW":
-                vm.lw(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.lw(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "SW":
-                vm.sw(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.sw(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "JM":
-                vm.jm(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.jm(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "JE":
-                vm.je(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.je(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "JA":
-                vm.ja(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.ja(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "JL":
-                vm.jl(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.jl(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "FO":
                 vm.fo(cmd.charAt(2), cmd.charAt(3));
                 return true;
             case "FR":
-                vm.fr(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.fr(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "FW":
-                vm.fw(Test.hexToInt(cmd.toUpperCase().charAt(2)), Test.hexToInt(cmd.toUpperCase().charAt(3)));
+                vm.fw(Utils.hexToInt(cmd.toUpperCase().charAt(2)), Utils.hexToInt(cmd.toUpperCase().charAt(3)));
                 return true;
             case "OR":
                 vm.or();
@@ -564,7 +570,7 @@ public class Rm {
     private void showRegister(Vm vm){
         int numOfSpaces = 11;
         byte[][] realTable = memory.memory[ptr.getDataInt()];
-        int vmPtr = Test.bytesToInt(realTable[vm.ptr.getDataInt()]);
+        int vmPtr = Utils.bytesToInt(realTable[vm.ptr.getDataInt()]);
         System.out.println("REGISTERS: PTR         R1         R2         DS         CS         TI         IC");
         System.out.println(String.format("   %" + numOfSpaces + "s" + "%" + numOfSpaces + "s" +"%" + numOfSpaces + "s"
                         +"%" + numOfSpaces + "s" +"%" + numOfSpaces + "s"  +"%" + numOfSpaces + "s"

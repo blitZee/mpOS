@@ -2,11 +2,10 @@ package Rm;
 
 import jdk.nashorn.internal.runtime.regexp.joni.encoding.IntHolder;
 import testTools.Constants;
-import testTools.Test;
+import utils.Utils;
 import vm.Vm;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
 /**
@@ -28,7 +27,7 @@ public class Memory {
         vmList = getFreeBlock();
         byte[][] vmListTable = memory[vmList];
         for(int i = 0; i < 16; i++){
-            vmListTable[i] = Test.intToBytes(getFreeBlock(), 4);
+            vmListTable[i] = Utils.intToBytes(getFreeBlock(), 4);
         }
         hdd = rm.hdd;
 
@@ -66,12 +65,12 @@ public class Memory {
     }
 
     public int addToVm(String line, Vm vm, String programName, int lastCommand) throws Exception {
-        byte[][] pagesTable = memory[Test.bytesToInt(Rm.ptr.data)];
+        byte[][] pagesTable = memory[Utils.bytesToInt(Rm.ptr.data)];
         String[] words = line.split(" ");
         int ret = 0;
         int i = 0;
         if (prevDW) {
-            memory[0][0] = ByteBuffer.allocate(4).putInt(Integer.parseInt(words[0])).array();
+                memory[0][0] = ByteBuffer.allocate(4).putInt(Integer.parseInt(words[0])).array();
             prevDW = false;
             i++;
             vm.ic++;
@@ -115,7 +114,7 @@ public class Memory {
                 } else if (words[i].equals("CSEG")) {
                     memory[0][i] = "CSEG".getBytes();
                     ret = Constants.CSEG;
-                    vm.cs.data = Test.intToBytes(vm.ic, 4);
+                    vm.cs.data = Utils.intToBytes(vm.ic, 4);
                 } else {
                     memory[0][i] = words[i].getBytes();
                 }
@@ -140,15 +139,15 @@ public class Memory {
     }
 
     private int addToVm(Vm vm, String programName) {
-        byte[][] pagesTable = memory[Test.bytesToInt(Rm.ptr.data)];
+        byte[][] pagesTable = memory[Utils.bytesToInt(Rm.ptr.data)];
         // vm already has assigned ptr, so just add these blocks where is free
-        int rmPageTablePtr = Test.bytesToInt(Rm.ptr.data);
-        int vmPageTablePtr = Test.bytesToInt(vm.ptr.data);
-        byte[][] vmPageTable = memory[Test.bytesToInt(memory[rmPageTablePtr][vmPageTablePtr])];
+        int rmPageTablePtr = Utils.bytesToInt(Rm.ptr.data);
+        int vmPageTablePtr = Utils.bytesToInt(vm.ptr.data);
+        byte[][] vmPageTable = memory[Utils.bytesToInt(memory[rmPageTablePtr][vmPageTablePtr])];
         int freeBlock = getFreeBlock();
         if(freeBlock == Constants.NO_MEMORY)
             return Constants.NO_MEMORY;
-        vmPageTable[vm.ptr.blocksUsed] = Test.intToBytes(freeBlock, 4);
+        vmPageTable[vm.ptr.blocksUsed] = Utils.intToBytes(freeBlock, 4);
         copyBlock(memory[0], memory[freeBlock]);
         vm.ptr.blocksUsed++;
         return 0;
@@ -176,11 +175,11 @@ public class Memory {
         for (int i = 0; i < 256; i++) {
             blocks[i] = 0;
         }
-        int ptr = Test.bytesToInt(Rm.ptr.data);
+        int ptr = Utils.bytesToInt(Rm.ptr.data);
         blocks[ptr] = 1;// rm ptr is already used
         blocks[vmList] = 1;// vm list is already use also
         for(int i = 0; i < 16; i++){
-            int temp = Test.bytesToInt(memory[vmList][i]);
+            int temp = Utils.bytesToInt(memory[vmList][i]);
             blocks[temp] = 1;// also give space for all vm descriptors
         }
 
@@ -188,12 +187,12 @@ public class Memory {
         byte[][] vmPtrBlock;
 
         for (int i = 0; i < 16; i++) {
-            int vmPtr = Test.bytesToInt(rmPtrBlock[i]);
+            int vmPtr = Utils.bytesToInt(rmPtrBlock[i]);
             blocks[vmPtr] = 1;
             vmPtrBlock = memory[vmPtr];
             if (vmPtr != 0) {
                 for (int j = 0; j < 16; j++) {
-                    int temp = Test.bytesToInt(vmPtrBlock[j]);
+                    int temp = Utils.bytesToInt(vmPtrBlock[j]);
                     try {
                         blocks[temp]++;// TODO change to "blocks[temp] = 1;"
                     } catch (Exception e) {
@@ -212,7 +211,7 @@ public class Memory {
         if (lastCommand == Constants.DW) {// last was DW
             temp.value = Constants.DW;
             int value = ByteBuffer.wrap(memory[0][i]).getInt();
-            if (value < 0) {
+            if (value < 0 || value > 10000) {
                 System.out.println("VALUE TOO HIGH!!!!!!");
                 throw new Exception("Value too high");
             }
@@ -227,11 +226,15 @@ public class Memory {
             if (ByteBuffer.wrap(memory[0][i]).getInt() != 0) {
                 if (!isValidCommad(memory[0][i], temp)) {
                     return false;
-                }
-                if (temp.value == Constants.DW || temp.value == Constants.DT) {
+                }else if (temp.value == Constants.DW) {
                     i++;
-                }
-                if (temp.value == Constants.HALT) {
+                    int t = Utils.bytesToInt(memory[0][i]);
+                    if(t < 0 || t > 10000){
+                        return false;
+                    }
+                }else if(temp.value == Constants.DT) {
+                    i++;
+                }else if (temp.value == Constants.HALT) {
                     break;
                 }
             }
@@ -362,7 +365,7 @@ public class Memory {
                     temp.value = Constants.DW;
                     return true;
                 case "DT00":
-                    temp.value = Constants.DW;
+                    temp.value = Constants.DT;
                     return true;
             }
         }
@@ -381,14 +384,14 @@ public class Memory {
     public void showDataSegment(Rm rm, String programName){
         byte [][] vmDescriptor = rm.getVmDescriptor(programName);
         if ( vmDescriptor != null ) {
-            int ptrIndex = Test.bytesToInt(vmDescriptor[Constants.VM_PTR_INDEX]);
-            int dsIndex = Test.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
-            int csIndex = Test.bytesToInt(vmDescriptor[Constants.VM_CS_INDEX]);
-            byte[][] rmTable = memory[Test.bytesToInt(Rm.ptr.data)];
-            byte[][] vmTable = memory[Test.bytesToInt(rmTable[ptrIndex])];
+            int ptrIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_PTR_INDEX]);
+            int dsIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
+            int csIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_CS_INDEX]);
+            byte[][] rmTable = memory[Utils.bytesToInt(Rm.ptr.data)];
+            byte[][] vmTable = memory[Utils.bytesToInt(rmTable[ptrIndex])];
             int lastCommand = 0;
             for (int i = 0; i < 16; i++) { // pereina vm ptr bloku lentele
-                int vmBlockNumber = Test.bytesToInt(vmTable[i]);
+                int vmBlockNumber = Utils.bytesToInt(vmTable[i]);
                 if (vmBlockNumber != 0){
                     for (int j = 0; j < 16; j++){
                         if (lastCommand == 1) {
@@ -441,14 +444,14 @@ public class Memory {
     public void showCodeSegment(Rm rm, String programName) {
         byte [][] vmDescriptor = rm.getVmDescriptor(programName);
         if ( vmDescriptor != null ) {
-            int ptrIndex = Test.bytesToInt(vmDescriptor[Constants.VM_PTR_INDEX]);
-            int dsIndex = Test.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
-            int csIndex = Test.bytesToInt(vmDescriptor[Constants.VM_CS_INDEX]);
-            byte[][] rmTable = memory[Test.bytesToInt(Rm.ptr.data)];
-            byte[][] vmTable = memory[Test.bytesToInt(rmTable[ptrIndex])];
+            int ptrIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_PTR_INDEX]);
+            int dsIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
+            int csIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_CS_INDEX]);
+            byte[][] rmTable = memory[Utils.bytesToInt(Rm.ptr.data)];
+            byte[][] vmTable = memory[Utils.bytesToInt(rmTable[ptrIndex])];
             int fullOfDS = csIndex / 16;
             for (int i = fullOfDS; i < 16; i++) { // pereina vm ptr bloku lentele
-                int vmBlockNumber = Test.bytesToInt(vmTable[i]);
+                int vmBlockNumber = Utils.bytesToInt(vmTable[i]);
                 if (vmBlockNumber != 0) {
                     if (i == fullOfDS) {
                         for (int j = 0; j < csIndex % 16 -1; j++) {
@@ -507,7 +510,7 @@ public class Memory {
             if (lastCommand == 1) {
                 ByteBuffer buffer2 = ByteBuffer.wrap(memory[t][j]);
                 int t2 = buffer2.getInt();
-                System.out.print(t2 + " ");
+                System.out.print(Utils.intToString(t2) + " ");
                 lastCommand = 0;
                 j++;
             } else if (lastCommand == 2) {
@@ -524,7 +527,7 @@ public class Memory {
                 if (j < 16) {
                     ByteBuffer buffer2 = ByteBuffer.wrap(memory[t][j]);
                     int t2 = buffer2.getInt();
-                    System.out.print(t2 + " ");
+                    System.out.print(Utils.intToString(t2) + " ");
                 } else
                     lastCommand = 1;
 

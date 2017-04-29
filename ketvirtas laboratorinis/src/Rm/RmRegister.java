@@ -1,6 +1,6 @@
 package Rm;
 
-import testTools.Test;
+import utils.Utils;
 
 import java.nio.ByteBuffer;
 
@@ -23,8 +23,8 @@ public class RmRegister {
     }
 
     public void inc(){
-        int temp = Test.bytesToInt(data);
+        int temp = Utils.bytesToInt(data);
         temp++;
-        data = Test.intToBytes(temp, size);
+        data = Utils.intToBytes(temp, size);
     }
 }

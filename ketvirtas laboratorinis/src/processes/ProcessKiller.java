@@ -1,11 +1,9 @@
 package processes;
 
-import java.lang.*;
-
 /**
  * Created by blitZ on 4/7/2017.
  */
-public class ProcessKiller extends java.lang.Process {
+public class ProcessKiller extends Process {
     public ProcessKiller(){
         ID = "ProcessKiller";
         PID = 9;

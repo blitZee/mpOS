@@ -2,10 +2,9 @@ package vm;
 
 import Rm.InterruptType;
 import testTools.Constants;
-import testTools.Test;
+import utils.Utils;
 import utils.OsLogger;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -29,8 +28,8 @@ public class Vm {
         this.rm = rm;
         ptr = new VmRegister(4, "puslapiavimo lentele");
         for (int i = 0; i < 16; i++) {
-            if (rm.memory.getInt(Test.bytesToInt(rm.ptr.data), i) == 0) {
-                ptr.data = Test.intToBytes(i, 4);
+            if (rm.memory.getInt(Utils.bytesToInt(rm.ptr.data), i) == 0) {
+                ptr.data = Utils.intToBytes(i, 4);
             }
         }
         sp = new VmRegister(1, "sp");
@@ -39,7 +38,7 @@ public class Vm {
         ds = new VmRegister(4, "data segment");
         cs = new VmRegister(4, "code segment");
         sf = new VmStatusFlag();
-        ds.data = Test.intToBytes(0, 4);
+        ds.data = Utils.intToBytes(0, 4);
         ic = 0;
     }
 
@@ -458,11 +457,11 @@ public class Vm {
         try {
             buffer = ByteBuffer.wrap(getData(x, y));
             temp = buffer.getInt();
-            sb.append("value: " + temp + " or " + new String(Test.intToBytes(temp, 4)));
+            sb.append("value: " + temp + " or " + new String(Utils.intToBytes(temp, 4)));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        r1.data = Test.intToBytes(temp, 4);
+        r1.data = Utils.intToBytes(temp, 4);
 
         OsLogger.writeToLog("LW" + x + " " + y + "; " + sb);
     }
@@ -563,8 +562,8 @@ public class Vm {
     }
     public void fo(int x, int y) {
         int pos = rm.getFilePos(x, y, true);
-        if(pos >= 0)
-            r1.data = Test.intToBytes(pos, 4);
+        if(pos >= 0 && pos < 255)
+            r1.data = Utils.intToBytes(pos, 4);
         else
             Rm.Rm.setPI(InterruptType.INCORRECT_FILE_NAME);
 
@@ -588,11 +587,18 @@ public class Vm {
     }
 
     public void fr(int x, int y) {
-        //r2.data = Test.intToBytes(1, 4);
+        //r2.data = Utils.intToBytes(1, 4);
         if(r1.getDataInt() < 0){
             Rm.Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
-        } else
-            rm.fileRead(r1.data, x, y, r2.data, this);
+        } else {
+            r2.data = rm.fileRead(r1.data);
+            byte[] temp = {0, 0, r1.data[0], r1.data[1]};
+            int temp2 = Utils.bytesToInt(temp);
+            temp2++;
+            temp = Utils.intToBytes(temp2, 4);
+            r1.data[0] = temp[2];
+            r1.data[1] = temp[3];
+        }
 
         OsLogger.writeToLog("FR" + x + ", " + y + "; handler: " + r1.getDataInt());
     }
@@ -602,11 +608,21 @@ public class Vm {
             Rm.Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
         } else {
             try {
-                byte[] data = getData(x, y);
-                if (r2.getDataInt() < 255)
-                    rm.fileWrite(r1.data, data, r2.data);
-                else
+                //byte[] data = getData(x, y);
+                byte[] data = r2.data;
+                if(Utils.bytesToInt(new byte[]{0, 0, r1.data[0], r1.data[3]}) < 255) {
+                    rm.fileWrite(r1.data, data);
+                    byte[] temp = {0, 0, r1.data[0], r1.data[1]};
+                    int temp2 = Utils.bytesToInt(temp);
+                    temp2++;
+                    temp = Utils.intToBytes(temp2, 4);
+                    r1.data[0] = temp[2];
+                    r1.data[1] = temp[3];
+                }
+                else {
+                    Rm.Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
                     System.out.println("File is not big enough");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -621,7 +637,7 @@ public class Vm {
 
     private byte[] getData(int x, int y) throws Exception {
         byte[][] rmPtrTable = rm.memory.memory[Rm.Rm.ptr.getDataInt()];
-        byte[][] vmPtrTable = rm.memory.memory[Test.bytesToInt(rmPtrTable[ptr.getDataInt()])];
+        byte[][] vmPtrTable = rm.memory.memory[Utils.bytesToInt(rmPtrTable[ptr.getDataInt()])];
         byte[][] temp;
         int pos = (x * 16 + y) * 2;
         if(pos >= cs.getDataInt()){
@@ -629,28 +645,28 @@ public class Vm {
         }
         x = pos / 16;
         y = pos % 16;
-        temp = rm.memory.memory[Test.bytesToInt(vmPtrTable[x])];
+        temp = rm.memory.memory[Utils.bytesToInt(vmPtrTable[x])];
         return temp[y];
     }
 
     private void saveData(int x, int y) throws Exception {
         byte[][] rmPtrTable = rm.memory.memory[Rm.Rm.ptr.getDataInt()];
-        byte[][] vmPtrTable = rm.memory.memory[Test.bytesToInt(rmPtrTable[ptr.getDataInt()])];
+        byte[][] vmPtrTable = rm.memory.memory[Utils.bytesToInt(rmPtrTable[ptr.getDataInt()])];
         int pos = (x * 16 + y) * 2;
         if(pos >= cs.getDataInt()){
             throw new Exception("Going too far");
         }
-        rm.memory.memory[Test.bytesToInt(vmPtrTable[pos / 16])][pos % 16] = r1.data;
+        rm.memory.memory[Utils.bytesToInt(vmPtrTable[pos / 16])][pos % 16] = r1.data;
 
     }
     public void saveData(int x, int y, byte[] bytes) throws Exception {
         byte[][] rmPtrTable = rm.memory.memory[Rm.Rm.ptr.getDataInt()];
-        byte[][] vmPtrTable = rm.memory.memory[Test.bytesToInt(rmPtrTable[ptr.getDataInt()])];
+        byte[][] vmPtrTable = rm.memory.memory[Utils.bytesToInt(rmPtrTable[ptr.getDataInt()])];
         int pos = (x * 16 + y) * 2;
         if(pos >= cs.getDataInt()){
             throw new Exception("Going too far");
         }
-        rm.memory.memory[Test.bytesToInt(vmPtrTable[pos / 16])][pos % 16] = bytes;
+        rm.memory.memory[Utils.bytesToInt(vmPtrTable[pos / 16])][pos % 16] = bytes;
 
     }
 

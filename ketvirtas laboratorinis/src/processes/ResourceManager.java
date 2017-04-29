@@ -1,11 +1,9 @@
 package processes;
 
-import java.lang.*;
-
 /**
  * Created by blitZ on 4/7/2017.
  */
-public class ResourceManager extends java.lang.Process {
+public class ResourceManager extends Process {
     public ResourceManager(){
         ID = "ResourceManager";
         PID = 10;
