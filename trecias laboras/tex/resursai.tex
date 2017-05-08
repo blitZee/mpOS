@@ -6,7 +6,7 @@
 			\item \textbf{PROC} - sąrašas procesų, kurie prašė šio resurso.
 			\item \textbf{STATE} - resurso būsena.
 			\item \textbf{PID} - procesas, sukūręs resursą.
-			\textbf{}
+			\item \textbf{CONTENT} - turinys.
 		\end{enumerate}
 	\subsection{Resursų tipai ir magic number}
 		
@@ -21,68 +21,38 @@
 			\hline
 			1 				& OSExit		& Start\_Stop			& ProcessKiller			& OS darbo baigimas.\\
 			\hline
-			2				& ReadBlock		& Get\_Put\_Data		& (bet koks)			& Blokas, esantis atmintyje, įrašomas į duomenų segmentą.\\
+			2				& ReadWord		& Get\_Put\_Data		& (bet koks)			& Žodis, esantis atmintyje, įrašomas į R1.\\	
 			\hline
-			3				& WriteBlock	& Get\_Put\_Data		& (bet koks)			& Blokas, esantis duomenų segmente, įrašomas į  vietą, nurodytą atmintyje.\\
+			3				& WriteWord		& Get\_Put\_Data		& (bet koks)			& Žodis, esantis R1, įrašomas į vietą, nurodytą atmintyje.\\
 			\hline
-			4				& ReadWord		& Get\_Put\_Data		& (bet koks)			& Žodis, esantis atmintyje, įrašomas į duomenų segmentą.\\	
+			4				& NeedInput		& Chan\_2\_Device		& (INT)					& Įvedimo srautas iš vartotojo.\\
 			\hline
-			5				& WriteWord		& Get\_Put\_Data		& (bet koks)			& Žodis, esantis duomenų segmente, įrašomas į vietą, nurodytą atmintyje.\\
+			5				& NeedOutput	& Chan\_3\_Device		& (INT)					& Išvedimo srautas į ekraną.\\
 			\hline
-			6				& NeedInput		& Chan\_2\_Device		& (INT)					& Įvedimo srautas iš vartotojo.\\
+			6				& ReadFile		& Chan\_1\_Device		& VM, Loader			& Failo nuskaitymas.\\
 			\hline
-			7				& NeedOutput	& Chan\_3\_Device		& (INT)					& Išvedimo srautas į ekraną.\\
+			7				& OpenFile		& Chan\_1\_Device		& VM, Loader			& Failo atidarymas.\\
 			\hline
-			8				& ReadFile		& Chan\_1\_Device		& (INT)					& Failo nuskaitymas.\\
+			8				& WriteFile		& Chan\_1\_Device		& VM					& Rašymas į failą.\\
 			\hline
-			9				& OpenFile		& Chan\_1\_Device		& (INT)					& Failo atidarymas.\\
+			9				& CloseFile		& Chan\_1\_Device		& VM, Loader			& Failo uždarymas.\\
 			\hline
-			10				& WriteFile		& Chan\_1\_Device		& (INT)					& Rašymas į failą.\\
+			10				& DeleteFile	& Chan\_1\_Device		& VM					& Failo ištrinimas pagal nurodytą deskriptorių.\\
 			\hline
-			11				& CloseFile		& Chan\_1\_Device		& (INT)					& Failo uždarymas.\\
+			11				& ProgramHalt	& Process\_Killer		& VM					& Programos sustabdymas.\\
 			\hline
-			12				& DeleteFile	& Chan\_1\_Device		& (INT)					& Failo ištrinimas pagal nurodytą deskriptorių.\\
+			12				& VartotojoAtmintis 	& Job\_Governor	& Start\_Stop			& Adresas, nurodantis proceso vietą atmintyje.\\
 			\hline
-			13				& SeekFile		& Chan\_1\_Device		& (INT)					& Pozicijos faile pakeitimas.\\
+			13				& PakrovimoPaketas		& Loader		& Start\_Stop			& Adresas, kur krauti duomenis.\\
 			\hline
-			14				& ProgramStart	& Loader				& (INT)					& Programos pakrovimas į atmintį.\\
+			14				& Interrupt		& Job\_Governor   		& Start\_Stop			& Pertraukimas.\\
+			\hline		
+			15				& Validation	& JCL					& Start\_Stop			& Validacija.\\
 			\hline
-			15				& ProgramHalt	& ProcessKiller			& (INT)					& Programos sustabdymas.\\
-			\hline
+			16				& Run			& Main\_Proc			& Start\_Stop			& Pradėti darbą.\\
+			\hline 
 			
 		\end{tabular}
-		
-		\begin{enumerate}
-			\item \textbf{OSExit} - OS darbo baigimas. Laukia Start\_Stop procesas, kuria - ProcessKiller. \\
-			
-			\textbf{Resursai, skirti darbui su vidine atmintimi}: Kuriantys procesai gali būti bet kokie, o laukiantis - visada Get\_Put\_Data.
-			
-			\item \textbf{ReadBlock} - Blokas, esantis atmintyje, atmintyje, įrašomas į duomenų segmentą.
-			\item \textbf{WriteBlock} - Blokas, esantis duomenų segmente, įrašomas į vietą, nurodytą atmintyje.
-			\item \textbf{ReadWord} - Žodis, esantis atmintyje, įrašomas į duomenų segmentą.
-			\item \textbf{WriteWord} - Žodis, esantis duomenų segmente, įrašomas į vietą, nurodytą atmintyje.\\
-			
-			\textbf{Resursai, skriti darbui su srautais}:
-			
-			\item \textbf{NeedInput} - Įvedimo srautas iš vartotojo. Laukia Chan\_2\_Device, kuria - (INT). 
-			\item \textbf{NeedOutput} -Išvedimo srautas į ekraną.
-			Laukia Chan\_3\_Device, kuria - (INT).\\
-			
-			\textbf{Resursai, skirti darbui su failais}: Kuriantysis procesas visada (INT), o laukiantysis - Chan\_1\_Device.
-			
-			\item \textbf{ReadFile} - Failo nuskaitymas.
-			\item \textbf{OpenFile} - Failo atidarymas.
-			\item \textbf{WriteFile} - Rašymas į failą.
-			\item \textbf{CloseFile} - Failo uždarymas
-			\item \textbf{DeleteFile} - Failo ištrinimas pagal nurodytą deskriptorių.
-			\item \textbf{SeekFile} - Pozicijos faile pakeitimas.\\
-			
-			\textbf{Resursui, skirti darbui su programomis}:
-			
-			\item \textbf{ProgramStart} - Programos pakrovimas į atmintį. Laukia Loader procesas, kuria - (INT).
-			\item \textbf{ProgramHalt} - Programos sustabdymas. Laukia ProcessKiller procesas, kuria - (INT).
-			
-		\end{enumerate}
 		
 		
 	\subsection{Resursų paskirstytojas}

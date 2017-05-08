@@ -48,13 +48,13 @@
 				\hline
 				1	& Start\_Stop		& 100			& Visų procesų tėvinis procesas; kuria ir naikina sisteminius procesus ir resursus. Visalaiką užsiblokavęs, kol dirba OS\\
 				\hline
-				2	& Job\_Governor		& 99			& Procesų paskirstytojas, tvarkantis virtualių mašinų darbą.\\
+				2	& Job\_Governor		& 97			& Įjungia VM ir laukia pertraukimų iš jos.\\
 				\hline
 				3	& Loader			& 96			& Užkrauna procesą iš išorinės atminties į vidinę atmintį.\\
 				\hline
 				4	& Chan\_1\_Device	& 90			& Perrašo duomenis tarp išorinės atminties ir vidinės atminties.\\
 				\hline
-				5	& Interrupt			& 98			& Procesas, kuris, įvykus pertraukimui, jį identifikuoja ir siunčia pranešimą Job\_Governor.\\
+				5	& Interrupt			& 99			& Procesas, kuris, įvykus pertraukimui, jį identifikuoja ir siunčia pranešimą Job\_Governor.\\
 				\hline
 				6	& Get\_Put\_Data	& 85			& Procesas, dirbantis su duomenimis vidinėje atmintyje.\\
 				\hline
@@ -67,6 +67,8 @@
 				10	& JCL				& 69 			& \textbf{J}ob \textbf{C}ontrol \textbf{L}anguage procesas gauna blokus iš Chan\_2\_Device ir peržiūri, ar programos kodo struktūra yra korektiška; jei taip, perduoda programos blokų sąrašą Chan\_1\_Device.\\
 				\hline
 				11	& VM				& 50			& Procesas, skirtas vykdyti vartotojo programą tol, kol aptinkamas pertraukimas.\\
+				\hline
+				12 & Main\_Proc			& 98			& Kuria JobGovernor procesus.\\
 				\hline
 		\end{tabular}
 	\subsection{Start\_stop}

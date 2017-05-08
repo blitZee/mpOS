@@ -1,7 +1,7 @@
 \section{Realios mašinos modelis}
 	\subsection{Realios mašinos brėžinys}
 	\begin{flushleft}
-	\includegraphics[scale=0.9]{kita/OS15new.png}
+	\includegraphics[scale=0.9]{kita/OS.png}
 	\end{flushleft}
 	\subsection{Realios mašinos registrai}
 	\begin{enumerate}
@@ -55,6 +55,8 @@
 	\item 1 - Undefined operation code. Neteisingas operacijos kodas.
 	\item 2 - Undefined address. Neteisingas adresas.
 	\item 3 - Division by zero. Dalyba iš nulio.
+	\item 4 - Input. Laukiama įvedimo.
+	\item 5 - Output. Norima išvesti informaciją.
 	\end{itemize}
 	
 	\subsection{Realios mašinos rėžimai}
@@ -62,7 +64,7 @@
 	
 	Supervizoriaus rėžimu programa bus vykdoma nuo pradžios iki galo, ją nutraukti gali tik pertraukimai. Visi realios mašinos resusrsai yra prieinami.
 	
-	Vortotojo rėžimu programa gali vykti kelios programos vienu metu, po kiekvieno veiksmo taimeris mažinamas ir kai jis pasiekia nulį, toliau procesoriaus darbą nustato prioritetų automatas. Prieinama atmintis yra tik ta, kurią išskyrė procesorius.
+	Vortotojo rėžimu programa gali vykti kelios programos vienu metu, po kiekvieno veiksmo taimeris mažinamas ir kai jis pasiekia nulį, toliau procesoriaus darbą nustato Procesų planuotojas. Prieinama atmintis yra tik ta, kurią išskyrė procesorius.
 	
 	\subsection{Puslapių transliacija}
 	Puslapių transliavimo mechanizmas naudojamas, tam, kad galėtumę susieti virtualią ir realią atmintis. registre PTR bus laikomas puslapiavimo lentelės bloko adresas, kurio kiekviename žodyje bus laikomas virtualios mašinos puslapio takelio adresas. 
@@ -92,9 +94,5 @@
 	Pirmojo bloko struktūra:\\ 
 	Šis blokas yra skirtas aprašyti kokioms programoms yra duoti kiti blokai. Pirmasis žodis aprašo programą esančią pirmąjame bloke, antrasis - antrajame ir t.t. Vieno žodžio struktūra: \(x_1x_2x_3x_4\)\\
 	\(x_1x_2\) yra skirti failo pavadinimui, \(x_3\) yra skirtas nusakyti, ar failas atidarytas, ar ne(0 jei neatidarytas, 1, jei atidarytas), o \(x_4\) yra skirti nusakyti kelinta išskaidyto failo dalis tai yra.\\
-	Kitų blokų struktūra:
-	\begin{itemize}
-	\item Pirmasis žodis yra specialus ženklas susidedantis iš keturių dolerių(\$\$\$\$).%subject to change
-	\item Visi kiti žodžiai skirti duomenims.
-	\end{itemize}
+	Kitų blokų struktūra: visi žodžiai skirti duomenims
 \clearpage

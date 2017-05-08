@@ -1,0 +1,47 @@
+\select@language {lithuanian}
+\contentsline {section}{\numberline {1}Projekto sąlygos}{3}{section.1}
+\contentsline {section}{\numberline {2}Realios mašinos modelis}{4}{section.2}
+\contentsline {subsection}{\numberline {2.1}Realios mašinos brėžinys}{4}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Realios mašinos registrai}{4}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Taimerio mechanizmas}{5}{subsection.2.3}
+\contentsline {subsection}{\numberline {2.4}Supervizoriniai pertraukimai}{5}{subsection.2.4}
+\contentsline {subsection}{\numberline {2.5}Programiniai pertraukimai}{6}{subsection.2.5}
+\contentsline {subsection}{\numberline {2.6}Realios mašinos rėžimai}{6}{subsection.2.6}
+\contentsline {subsection}{\numberline {2.7}Puslapių transliacija}{6}{subsection.2.7}
+\contentsline {subsection}{\numberline {2.8}Įvedimas ir išvedimas}{6}{subsection.2.8}
+\contentsline {subsection}{\numberline {2.9}Atminties įrenginiai}{6}{subsection.2.9}
+\contentsline {subsection}{\numberline {2.10}Išorinė atmintis}{7}{subsection.2.10}
+\contentsline {section}{\numberline {3}Virtualios mašinos modelis}{8}{section.3}
+\contentsline {subsection}{\numberline {3.1}Virtualios mašinos schema}{8}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Virtualios mašinos samprata}{8}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Virtualios mašinos loginiai komponentai}{8}{subsection.3.3}
+\contentsline {subsubsection}{\numberline {3.3.1}Virtualios mašinos atmintis}{8}{subsubsection.3.3.1}
+\contentsline {subsubsection}{\numberline {3.3.2}Virtualios mašinos procesorius}{8}{subsubsection.3.3.2}
+\contentsline {subsubsection}{\numberline {3.3.3}Virtualios mašinos komandų sistema}{9}{subsubsection.3.3.3}
+\contentsline {section}{\numberline {4}Programos pavyzdys}{11}{section.4}
+\contentsline {section}{\numberline {5}Procesai ir jų primityvai}{12}{section.5}
+\contentsline {subsection}{\numberline {5.1}Procesų būsenos}{12}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}Būsenų sąryšiai}{12}{subsection.5.2}
+\contentsline {subsection}{\numberline {5.3}Proceso deskriptorius}{13}{subsection.5.3}
+\contentsline {subsection}{\numberline {5.4}Procesų sąrašai}{13}{subsection.5.4}
+\contentsline {subsection}{\numberline {5.5}Prioritetų sudarymo tvarka}{13}{subsection.5.5}
+\contentsline {subsection}{\numberline {5.6}Sisteminiai procesai}{13}{subsection.5.6}
+\contentsline {subsection}{\numberline {5.7}Start\_stop}{15}{subsection.5.7}
+\contentsline {subsection}{\numberline {5.8}Job\_Governor}{15}{subsection.5.8}
+\contentsline {subsection}{\numberline {5.9}Loader}{17}{subsection.5.9}
+\contentsline {subsection}{\numberline {5.10}Chan\_1\_Device}{18}{subsection.5.10}
+\contentsline {subsection}{\numberline {5.11}Interrupt}{18}{subsection.5.11}
+\contentsline {subsection}{\numberline {5.12}Get\_put\_data}{19}{subsection.5.12}
+\contentsline {subsection}{\numberline {5.13}Chan\_2\_Device}{19}{subsection.5.13}
+\contentsline {subsection}{\numberline {5.14}Chan\_3\_Device}{20}{subsection.5.14}
+\contentsline {subsection}{\numberline {5.15}Process\_killer}{20}{subsection.5.15}
+\contentsline {subsection}{\numberline {5.16}JCL}{21}{subsection.5.16}
+\contentsline {subsection}{\numberline {5.17}VM}{21}{subsection.5.17}
+\contentsline {subsection}{\numberline {5.18}Main\_proc}{22}{subsection.5.18}
+\contentsline {subsection}{\numberline {5.19}Procesų planuotojas}{22}{subsection.5.19}
+\contentsline {subsection}{\numberline {5.20}Procesų planuotojo primityvai}{22}{subsection.5.20}
+\contentsline {section}{\numberline {6}Resursai}{23}{section.6}
+\contentsline {subsection}{\numberline {6.1}Resursų deskriptorius}{23}{subsection.6.1}
+\contentsline {subsection}{\numberline {6.2}Resursų tipai ir magic number}{23}{subsection.6.2}
+\contentsline {subsection}{\numberline {6.3}Resursų paskirstytojas}{24}{subsection.6.3}
+\contentsline {subsection}{\numberline {6.4}Resursų primityvai}{24}{subsection.6.4}
