@@ -2,15 +2,18 @@ package processes;
 
 import Rm.RmRegister;
 import Rm.RmStatusFlag;
+import resources.Resource;
+
+import java.util.ArrayList;
 
 /**
  * Created by blitZ on 4/7/2017.
  */
-public abstract class Process {
-    String ID;
+public abstract class MIKOSProcess {
+    public String ID;
     int PID;
     int PPID;
-    int RES;
+    public ArrayList<Resource> RES = new ArrayList<>();
     int CRES;
     int priority;
 
@@ -25,5 +28,5 @@ public abstract class Process {
 
     public int IC;
 
-    public abstract void doProcess();
+    public abstract void doProcess(Resource resource);
 }

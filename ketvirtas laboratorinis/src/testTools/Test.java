@@ -29,21 +29,6 @@ public class Test {
 
     }
 
-    public void testLoad(String programName) {
-        //rm.load(fileName, programName);
-        try {
-            rm.load(programName);
-            rm.showBlock(programName);
-            byte[][] descriptor = rm.getVmDescriptor(programName);
-            System.out.println("Vm name: " + new String(descriptor[Constants.VM_NAME_INDEX]));
-            System.out.println("Vm data segment: " + bytesToInt(descriptor[Constants.VM_DS_INDEX]));
-            System.out.println("Vm code segment: " + bytesToInt(descriptor[Constants.VM_CS_INDEX]));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
     /**
      * Takes block as an argument and prints it's content as if it's code
      */

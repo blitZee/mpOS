@@ -1,9 +1,11 @@
 package processes;
 
+import resources.Resource;
+
 /**
  * Created by blitZ on 4/7/2017.
  */
-public class VM extends Process {
+public class VM extends MIKOSProcess {
     public VM(){
         ID = "VM";
         PID = 12;
@@ -14,7 +16,7 @@ public class VM extends Process {
     }
 
     @Override
-    public void doProcess() {
+    public void doProcess(Resource resource) {
         STATE = State.RUNNING;
 
 

@@ -1,9 +1,11 @@
 package processes;
 
+import resources.Resource;
+
 /**
  * Created by blitZ on 4/7/2017.
  */
-public class StartStop extends Process {
+public class StartStop extends MIKOSProcess {
 
     public StartStop(){
         ID = "StartStop";
@@ -15,7 +17,7 @@ public class StartStop extends Process {
     }
 
     @Override
-    public void doProcess() {
+    public void doProcess(Resource resource) {
         STATE = State.RUNNING;
 
 

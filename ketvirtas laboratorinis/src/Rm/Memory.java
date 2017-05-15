@@ -17,19 +17,14 @@ public class Memory {
     boolean prevDW = false;
     boolean prevDT = false;
 
-    public int vmList = 0;
+    //public int vmList = 0;
 
-    public Memory(Rm rm) {
+    public Memory() {
         memory = new byte[256][16][4];
-        rm.ptr.data = ByteBuffer.allocate(4).putInt(1).array(); //rm.ptr yra registras, jo data
+        Rm.ptr.data = ByteBuffer.allocate(4).putInt(1).array(); //rm.ptr yra registras, jo data
         // laukas nustatomas i 1 bloka
         // Tas laukas rodys i bloka, kuriame yra puslapiu lentele
-        vmList = getFreeBlock();
-        byte[][] vmListTable = memory[vmList];
-        for(int i = 0; i < 16; i++){
-            vmListTable[i] = Utils.intToBytes(getFreeBlock(), 4);
-        }
-        hdd = rm.hdd;
+        hdd = Rm.hdd;
 
     }
 
@@ -177,11 +172,6 @@ public class Memory {
         }
         int ptr = Utils.bytesToInt(Rm.ptr.data);
         blocks[ptr] = 1;// rm ptr is already used
-        blocks[vmList] = 1;// vm list is already use also
-        for(int i = 0; i < 16; i++){
-            int temp = Utils.bytesToInt(memory[vmList][i]);
-            blocks[temp] = 1;// also give space for all vm descriptors
-        }
 
         byte[][] rmPtrBlock = memory[ptr];
         byte[][] vmPtrBlock;
@@ -222,7 +212,7 @@ public class Memory {
         } else if (lastCommand == Constants.CSEG) {
             temp.value = Constants.CSEG;
         }
-        for (i = i; i < 16; i++) {
+        for (; i < 16; i++) {
             if (ByteBuffer.wrap(memory[0][i]).getInt() != 0) {
                 if (!isValidCommad(memory[0][i], temp)) {
                     return false;
@@ -242,7 +232,7 @@ public class Memory {
         return true;
     }
 
-    boolean isValidCommad(byte[] command, IntHolder temp) {
+    private boolean isValidCommad(byte[] command, IntHolder temp) {
         String cmd = new String(command);
         if (temp.value == Constants.CSEG) {
             switch (cmd.substring(0, 2)) {
@@ -381,12 +371,12 @@ public class Memory {
         return ByteBuffer.wrap(memory[i][j]).getInt();
     }
 
-    public void showDataSegment(Rm rm, String programName){
-        byte [][] vmDescriptor = rm.getVmDescriptor(programName);
+    public void showDataSegment(String programName){
+        Vm vmDescriptor = Rm.getVmDescriptor(programName);
         if ( vmDescriptor != null ) {
-            int ptrIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_PTR_INDEX]);
-            int dsIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
-            int csIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_CS_INDEX]);
+            int ptrIndex = Utils.bytesToInt(vmDescriptor.ptr.data);
+            //int dsIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
+            //int csIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_CS_INDEX]);
             byte[][] rmTable = memory[Utils.bytesToInt(Rm.ptr.data)];
             byte[][] vmTable = memory[Utils.bytesToInt(rmTable[ptrIndex])];
             int lastCommand = 0;
@@ -441,12 +431,12 @@ public class Memory {
         }
     }
 
-    public void showCodeSegment(Rm rm, String programName) {
-        byte [][] vmDescriptor = rm.getVmDescriptor(programName);
+    public void showCodeSegment(String programName) {
+        Vm vmDescriptor = Rm.getVmDescriptor(programName);
         if ( vmDescriptor != null ) {
-            int ptrIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_PTR_INDEX]);
-            int dsIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
-            int csIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_CS_INDEX]);
+            int ptrIndex = Utils.bytesToInt(vmDescriptor.ptr.data);
+            //int dsIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
+            int csIndex = Utils.bytesToInt(vmDescriptor.cs.data);
             byte[][] rmTable = memory[Utils.bytesToInt(Rm.ptr.data)];
             byte[][] vmTable = memory[Utils.bytesToInt(rmTable[ptrIndex])];
             int fullOfDS = csIndex / 16;

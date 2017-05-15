@@ -1,9 +1,11 @@
 package processes;
 
+import resources.Resource;
+
 /**
  * Created by blitZ on 4/7/2017.
  */
-public class JCL extends Process {
+public class JCL extends MIKOSProcess {
     public JCL(){
         ID = "JCL";
         PID = 11;
@@ -14,7 +16,7 @@ public class JCL extends Process {
     }
 
     @Override
-    public void doProcess() {
+    public void doProcess(Resource resource) {
         STATE = State.RUNNING;
 
 

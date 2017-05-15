@@ -1,9 +1,11 @@
 package processes;
 
+import resources.Resource;
+
 /**
  * Created by blitZ on 4/7/2017.
  */
-public class ProcessKiller extends Process {
+public class ProcessKiller extends MIKOSProcess {
     public ProcessKiller(){
         ID = "ProcessKiller";
         PID = 9;
@@ -14,7 +16,7 @@ public class ProcessKiller extends Process {
     }
 
     @Override
-    public void doProcess() {
+    public void doProcess(Resource resource) {
         STATE = State.RUNNING;
 
 

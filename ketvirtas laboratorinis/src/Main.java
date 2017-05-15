@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.util.Scanner;
 
 import Rm.Rm;
+import processes.Interrupt;
+import resources.Resource;
+import resources.Type;
 import utils.OsLogger;
 
 /**
@@ -12,7 +15,8 @@ public class Main {
     public static void main(String[] args) {
         try {
             OsLogger.init("logger.txt");
-            Rm rm = new Rm();
+            //Rm rm = new Rm();
+            Rm.init();
             Scanner scanner = new Scanner(System.in);
             boolean work = true;
             System.out.println("Hello. Welcome to MikOS. Type \"help\" to view the command list");
@@ -23,7 +27,7 @@ public class Main {
                 switch (inArray[0].toLowerCase()) {
                     case "quit": {
                         try {
-                            rm.hdd.close();
+                            Rm.hdd.close();
                             OsLogger.close();
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -34,8 +38,13 @@ public class Main {
                     case "load": {
                         //rm.load(fileName(inArray), programName(inArray));
                         String programName = programName(inArray);
-                        if(programName != null && programName.length() == 2)
-                            rm.load(programName);
+                        if(programName != null && programName.length() == 2) {
+                            //rm.load(programName);
+                            Resource r = new Resource();
+                            r.content = programName;
+                            r.type = Type.VARTOTOJO_ATMINTIS;
+                            Rm.resourceList.add(r);
+                        }
                         else {
                             System.out.println("No program name given or incorrect format");
                         }
@@ -51,30 +60,32 @@ public class Main {
                     case "start": {
                         String programName = programName(inArray);
                         if(programName != null && programName.length() == 2)
-                            rm.start(programName);
+                            Rm.start(programName);
                         else {
                             System.out.println("No program name given or incorrect format");
                         }
                         break;
                     }
                     case "clear": {
-                        String programName = programName(inArray);
-                        if(programName != null)
-                            rm.removeVm(programName);
-                        else {
-                            System.out.println("No program name given");
+                        int id = programId(inArray);
+                        if(id < 0) {
+                            System.out.println("Incorrect Id");
+                            break;
+                        }
+                        else{
+                            Rm.removeVm(id);
                         }
                         break;
                     }
                     case "test": {
-                        rm.load(inArray[1]);
-                        rm.start(inArray[1]);
+                       // rm.load(inArray[1]);
+                       // rm.start(inArray[1]);
                         break;
                     }
                     case "show": {
                         String programName = programName(inArray);
                         if(programName != null)
-                            rm.showBlock(programName);
+                            Rm.showBlock(programName);
                         else {
                             System.out.println("No program name given");
                         }
@@ -83,7 +94,7 @@ public class Main {
                     case "showcs": {
                         String programName = programName(inArray);
                         if(programName != null)
-                            rm.showCseg(programName);
+                            Rm.showCseg(programName);
                         else {
                             System.out.println("No program name given");
                         }
@@ -92,7 +103,7 @@ public class Main {
                     case "showds": {
                         String programName = programName(inArray);
                         if(programName != null)
-                            rm.showDseg(programName);
+                            Rm.showDseg(programName);
                         else {
                             System.out.println("No program name given");
                         }
@@ -104,7 +115,10 @@ public class Main {
 
 
                 }
+                Rm.callResourceManager();
+                Rm.callProcessManager();
             }
+
             System.out.println("Exiting");
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,5 +153,15 @@ public class Main {
             }
         }
         return null;
+    }
+
+    private static int programId(String[] array) {
+        for (int i = 1; i < array.length; i++) {
+            if (array[i].equals("-p")) {
+                if(array.length > i + 1)
+                    return Integer.parseInt(array[i + 1]);
+            }
+        }
+        return -1;
     }
 }

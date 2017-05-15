@@ -1,5 +1,7 @@
 package Rm;
 
+import processes.*;
+import resources.Resource;
 import testTools.Constants;
 import utils.Utils;
 import utils.OsLogger;
@@ -7,6 +9,7 @@ import vm.Vm;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -15,27 +18,33 @@ import java.util.Scanner;
 public class Rm {
     public static boolean stepMode = false;
 
-    RmRegister mode;
+    static RmRegister mode;
     public static RmRegister ptr;
-    RmRegister r1;
-    RmRegister r2;
-    RmRegister ch1;
-    RmRegister ch2;
-    RmRegister ch3;
+    static RmRegister r1;
+    static RmRegister r2;
+    static RmRegister ch1;
+    static RmRegister ch2;
+    static RmRegister ch3;
 
     static RmInterrupt si;
     static RmInterrupt pi;
 
-    public HDD hdd;
-    public Memory memory;
+    public static HDD hdd;
+    public static Memory memory;
 
-    public RmStatusFlag sf;
+    public static RmStatusFlag sf;
 
-    int timer = 10;
-    int ic;
-    int ti;
+    static int timer = 10;
+    static int ic;
+    static int ti;
 
-    public Rm() {
+    public static ArrayList<Vm> VmList = new ArrayList();
+    public static ArrayList<Resource> resourceList = new ArrayList<>();
+    public static ArrayList<MIKOSProcess> processes = new ArrayList<>();
+    public static void init() {
+        processes.add(new ProcessManager());
+        processes.add(new ResourceManager());
+        processes.add(new Loader());
         mode = new RmRegister(1, "mode");
         ptr = new RmRegister(2, "ptr");
         r1 = new RmRegister(4, "register 1");
@@ -49,18 +58,35 @@ public class Rm {
         ic = 0;
         ti = 10;
         hdd = new HDD();
-        memory = new Memory(this);
+        memory = new Memory();
     }
 
-    public void start(String programName) {
-        byte[][] vmDescriptor = getVmDescriptor(programName);
+    public static void callResourceManager(){
+        for(MIKOSProcess p : processes){
+            if(p.ID.equals("ResourceManager")){
+                p.doProcess(null);
+                return;
+            }
+        }
+    }
+
+    public static void callProcessManager(){
+        for(MIKOSProcess p : processes){
+            if(p.ID.equals("ProcessManager")){
+                p.doProcess(null);
+            }
+        }
+    }
+
+    public static void start(String programName) {
+        Vm vmDescriptor = getVmDescriptor(programName);
         if (vmDescriptor == null) {
             //System.out.println("No such program");
             OsLogger.writeToLog("No program named " + programName + " to start");
             return;
         }
         Scanner scanner = new Scanner(System.in);
-        Vm vm = new Vm(this, vmDescriptor);
+        Vm vm = vmDescriptor;
         int[] codeBeginning = getCodeBeginning(vm);
         int[] indexes;
         //System.out.println("row: " + codeBeginning[0]);
@@ -102,62 +128,7 @@ public class Rm {
         }
     }
 
-    public void load(String programName) throws Exception {
-        if (getVmDescriptor(programName) != null) {
-            setSI(InterruptType.DUPLICATE_NAME);
-            OsLogger.writeToLog("There already is program loaded with this name " + programName);
-            return;
-        }
-
-        int ret = 0;
-        int vmPtr = getVmPtr();// assign space in rm ptr. Value can be from 0 to 15
-        if (vmPtr == -1) {
-            setSI(InterruptType.OUT_OF_MEMORY);
-            OsLogger.writeToLog("Out of space to add vm to pages table, vm name is " + programName);
-            return;
-        }
-        Vm vm = new Vm(this);// create vm only after we know that there are enough space in rm ptr
-        byte[][] rmTable = memory.memory[Utils.bytesToInt(Rm.ptr.data)];
-        vm.ptr.data = Utils.intToBytes(vmPtr, 4);
-        rmTable[vmPtr] = Utils.intToBytes(memory.getFreeBlock(), 4);
-        try {
-            long pos = findFilePos(programName);
-            if(pos < 0) {
-                setSI(InterruptType.INCORRECT_FILE_NAME);
-                OsLogger.writeToLog("No program named " + programName);
-                return;
-            }
-            while (true) {
-                String line = hdd.file.readLine();
-                ret = memory.addToVm(line, vm, programName, ret);
-                if (ret == Constants.HALT)
-                    break;
-                else if(ret == Constants.NO_MEMORY){
-                    setSI(InterruptType.OUT_OF_MEMORY);
-                    //System.out.println("No memory");
-                    OsLogger.writeToLog("No memory for vm, named " + programName);
-                    removeVm(vm);// TODO: This needs to be processed in interrupt
-                }
-            }
-        } catch (IOException e) {
-            removeVm(vm);
-            System.out.println("IO Exception");
-        } catch (Exception e) {
-            setPI(InterruptType.UNDEFINED_OPERATION_WHILE_LOADING);
-            removeVm(vm);// TODO: This needs to be processed in interrupt
-            OsLogger.writeToLog("Removed vm named " + programName + ", because of incorrect code");
-            return;
-        }
-        OsLogger.writeToLog("Load for program " + programName + " ended");
-        byte[][] vmListTable = memory.memory[memory.vmList];
-        byte[][] vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[vm.ptr.getDataInt()])];
-        vmDescriptor[Constants.VM_NAME_INDEX] = programName.getBytes();
-        vmDescriptor[Constants.VM_CS_INDEX] = vm.cs.data;
-        vmDescriptor[Constants.VM_DS_INDEX] = vm.ds.data;
-        vmDescriptor[Constants.VM_PTR_INDEX] = vm.ptr.data;
-    }
-
-    private long findFilePos(String programName) {
+    public static long findFilePos(String programName) {
         byte[] word = new byte[5];
         byte[] pName = programName.getBytes();
         int counter = 0;
@@ -186,7 +157,7 @@ public class Rm {
         return blockPosition;
     }
 
-    public int getFilePos(int x, int y, boolean open) {
+    public static int getFilePos(int x, int y, boolean open) {
         byte[] word = new byte[5];
         byte[] pName = new byte[2];
         pName[0] = (byte) x;
@@ -220,7 +191,7 @@ public class Rm {
         return counter;
     }
 
-    public void closeFile(byte[] handler){
+    public static void closeFile(byte[] handler){
         byte[] word = new byte[5];
         byte[] temp = {0, 0, handler[2], handler[3]};
         int hndl = Utils.bytesToInt(temp);
@@ -242,7 +213,7 @@ public class Rm {
 
     }
 
-    public byte[] fileRead(byte[] dr1){
+    public static byte[] fileRead(byte[] dr1){
         //DR1 - file handler
         // 10*x + y - vieta, i kuria rasysim duomenu segmente
         //DR2 - adresas is kurio skaitysim
@@ -280,7 +251,7 @@ public class Rm {
         return word;
     }
 
-    private void goToFilePosition(int handler){
+    private static void goToFilePosition(int handler){
         int blockNr = 0;
         try {// now go to that file
             hdd.file.seek(1296);
@@ -298,7 +269,7 @@ public class Rm {
             e.printStackTrace();
         }
     }
-    public void fileWrite(byte[] dr1, byte[] data){
+    public static void fileWrite(byte[] dr1, byte[] data){
         byte[] filePos = {0, 0, dr1[2], dr1[3]};
         byte[] positionToWrite = {0, 0, dr1[0], dr1[1]};
         goToFilePosition(Utils.bytesToInt(filePos));
@@ -316,7 +287,7 @@ public class Rm {
         }
     }
 
-    public void deleteFile(byte[] dr1){
+    public static  void deleteFile(byte[] dr1){
         int hndl = Utils.bytesToInt(dr1);
         byte[] word = new byte[5];
         int counter = 0;
@@ -345,7 +316,7 @@ public class Rm {
         }
     }
 
-    private int getVmPtr() {
+    public static int getVmPtr() {
         byte[][] rmTable = memory.memory[Utils.bytesToInt(Rm.ptr.data)];
         int vmPtr = -1;
         for (int i = 0; i < 16; i++) {
@@ -357,12 +328,12 @@ public class Rm {
         return vmPtr;
     }
 
-    public void showBlock(String programName) {
-        byte[][] vmListTable = memory.memory[memory.vmList];
-        byte[][] vmDescriptor;
+    public static void showBlock(String programName) {
+        Vm vmDescriptor = null;
         for(int i = 0; i < 16; i++){
-            vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[i])];
-            if(namesEqual(vmDescriptor[Constants.VM_NAME_INDEX], programName.getBytes()))
+            //vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[i])];
+            vmDescriptor = getVmDescriptor(programName);
+            if(vmDescriptor.name.equals(programName))
             {
                 byte[][] rmTable = memory.memory[Utils.bytesToInt(Rm.ptr.data)];
                 memory.showTrackMemory(ByteBuffer.wrap(rmTable[i]).getInt());
@@ -371,28 +342,33 @@ public class Rm {
         }
     }
 
-    public void showCseg(String programName){
-        memory.showCodeSegment(this, programName);
+    public static void showCseg(String programName){
+        memory.showCodeSegment(programName);
     }
 
-    public void showDseg(String programName){
-        memory.showDataSegment(this, programName);
+    public static void showDseg(String programName){
+        memory.showDataSegment(programName);
     }
 
-    public byte[][] getVmDescriptor(String programName){
-        byte[][] vmListTable = memory.memory[memory.vmList];
-        byte[][] vmDescriptor;
-        for(int i = 0; i < 16; i++){
-            vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[i])];
-            if(namesEqual(vmDescriptor[Constants.VM_NAME_INDEX], programName.getBytes()))
-            {
-                return vmDescriptor;
-            }
+    public static Vm getVmDescriptor(int id){
+        //byte[][] vmListTable = memory.memory[memory.vmList];
+        for(Vm vm : VmList){
+            if(vm.id == id)
+                return vm;
         }
         return null;
     }
 
-    private void removeVm(Vm vm) {
+    public static Vm getVmDescriptor(String programName){
+        for(Vm temp : VmList){
+            if(temp.name.equals(programName))
+                return temp;
+        }
+
+        return null;
+    }
+
+    public static void removeVm(Vm vm) {
         int rmPtr = Utils.bytesToInt(Rm.ptr.data);
         byte[][] rmPtrTable = memory.memory[rmPtr];
         int vmPtr = Utils.bytesToInt(vm.ptr.data);
@@ -405,14 +381,10 @@ public class Rm {
                 track[j] = Utils.intToBytes(0, 4);
             }
         }
-        byte[][] vmListTable = memory.memory[memory.vmList];
-        byte[][] vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[vm.ptr.getDataInt()])];
-        for(int i = 0; i < 16; i++){
-            vmDescriptor[i] = Utils.intToBytes(0, 4);
-        }
+        VmList.remove(vm);
     }
 
-    public void removeVm(String programName){
+    /*public void removeVm(String programName){
         int rmPtr = Utils.bytesToInt(Rm.ptr.data);
         byte[][] rmPtrTable = memory.memory[rmPtr];
         byte[][] descriptor = getVmDescriptor(programName);
@@ -434,9 +406,30 @@ public class Rm {
             descriptor[i] = Utils.intToBytes(0, 4);
         }
 
+    }*/
+
+    public static void removeVm(int id){
+        int rmPtr = Utils.bytesToInt(Rm.ptr.data);
+        byte[][] rmPtrTable = memory.memory[rmPtr];
+        Vm descriptor = getVmDescriptor(id);
+        if(descriptor == null){
+            System.out.println("No such program");
+            return;
+        }
+        int vmPtr = Utils.bytesToInt(descriptor.ptr.data);
+        byte[][] vmPtrTable = memory.memory[Utils.bytesToInt(rmPtrTable[vmPtr])];
+        rmPtrTable[vmPtr] = Utils.intToBytes(0, 4);
+        for (int i = 0; i < 16; i++) {
+            byte[][] track = memory.memory[Utils.bytesToInt(vmPtrTable[i])];
+            vmPtrTable[i] = Utils.intToBytes(0, 4);
+            for (int j = 0; j < 16; j++) {
+                track[j] = Utils.intToBytes(0, 4);
+            }
+        }
+        VmList.remove(descriptor);
     }
 
-    private int[] getCodeBeginning(Vm vm){
+    private static int[] getCodeBeginning(Vm vm){
         int temp = Utils.bytesToInt(vm.cs.data);
         int[] ret = new int[2];
         ret[0] = temp / 16;// row
@@ -444,7 +437,7 @@ public class Rm {
         return ret;
     }
 
-    private byte[] getCommand(Vm vm, int row, int col){
+    private static byte[] getCommand(Vm vm, int row, int col){
         byte[] ret;
         byte[][] rmPtrTable = memory.memory[ptr.getDataInt()];
         byte[][] vmPtrTable = memory.memory[Utils.bytesToInt(rmPtrTable[vm.ptr.getDataInt()])];
@@ -453,7 +446,7 @@ public class Rm {
         return ret;
     }
 
-    private int[] getNextIndexes(Vm vm){
+    private static int[] getNextIndexes(Vm vm){
         int temp = Utils.bytesToInt(vm.cs.data) + vm.ic;
         int[] ret = new int[2];
         ret[0] = temp / 16;// row
@@ -461,7 +454,7 @@ public class Rm {
         return ret;
     }
 
-    private boolean executeCommand(Vm vm, byte[] command){// returns false if command is HALT
+    private static boolean executeCommand(Vm vm, byte[] command){// returns false if command is HALT
         String cmd = new String(command);
         switch(cmd){
             case "ADRR":
@@ -567,7 +560,7 @@ public class Rm {
         return false;
     }
 
-    private void showRegister(Vm vm){
+    private static void showRegister(Vm vm){
         int numOfSpaces = 11;
         byte[][] realTable = memory.memory[ptr.getDataInt()];
         int vmPtr = Utils.bytesToInt(realTable[vm.ptr.getDataInt()]);
@@ -583,14 +576,14 @@ public class Rm {
                 timer,
                 vm.ic));
     }
-    private void test(Vm vm){
+    private static void test(Vm vm){
         if(si.type != InterruptType.NO_INTERRUPT){
             System.out.println("System interrupt");
         }
         if(pi.type != InterruptType.NO_INTERRUPT){
             System.out.println("Program interrupt");
         }
-        if(timer == 0){
+        if(timer <= 0){
             System.out.println("Timer interupt");
             timer = 10;
         }
@@ -616,6 +609,8 @@ public class Rm {
             System.out.println("Interrupt: Incorrect file handle");
             OsLogger.writeToLog("Interrupt: Incorrect file handle");
         }
+        si.type = InterruptType.NO_INTERRUPT;
+        pi.type = InterruptType.NO_INTERRUPT;
     }
 
     public static void setSI(InterruptType interupt){
@@ -626,7 +621,7 @@ public class Rm {
         pi.type = interrupt;
     }
 
-    private boolean namesEqual(byte[] arr1, byte[] arr2){
+    private static boolean namesEqual(byte[] arr1, byte[] arr2){
         return arr1[0] == arr2[0] && arr1[1] == arr2[1];
     }
 
