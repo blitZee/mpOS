@@ -1,7 +1,7 @@
 package Rm;
 
 import processes.*;
-import resources.Resource;
+import resources.*;
 import testTools.Constants;
 import utils.Utils;
 import utils.OsLogger;
@@ -10,12 +10,13 @@ import vm.Vm;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
 
 /**
  * Created by blitZ on 3/8/2017.
  */
-public class Rm {
+public class Rm implements Runnable{
     public static boolean stepMode = false;
 
     static RmRegister mode;
@@ -34,17 +35,20 @@ public class Rm {
 
     public static RmStatusFlag sf;
 
-    static int timer = 10;
+    public static int timer = 10;
     static int ic;
     static int ti;
-
+    public static boolean cont = true;
     public static ArrayList<Vm> VmList = new ArrayList();
-    public static ArrayList<Resource> resourceList = new ArrayList<>();
+    private static ArrayList<Resource> resourceList = new ArrayList<>();
     public static ArrayList<MIKOSProcess> processes = new ArrayList<>();
+    public static ArrayList<MIKOSProcess> processesToAdd = new ArrayList<>();
+    public static ArrayList<MIKOSProcess> processesToRemove = new ArrayList<>();
     public static void init() {
-        processes.add(new ProcessManager());
+        /*processes.add(new ProcessManager());
         processes.add(new ResourceManager());
         processes.add(new Loader());
+        processes.add(new JCL());*/
         mode = new RmRegister(1, "mode");
         ptr = new RmRegister(2, "ptr");
         r1 = new RmRegister(4, "register 1");
@@ -60,6 +64,31 @@ public class Rm {
         hdd = new HDD();
         memory = new Memory();
     }
+    @Override
+    public void run(){
+        try {
+            OsLogger.init("logger.txt");
+            new StartStop().doProcess(null);
+            Rm.init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        while (cont) {
+            synchronized (Rm.class) {
+                Rm.callResourceManager();
+                Rm.callProcessManager();
+                //System.out.println("hello");
+            }
+        }
+        try {
+            Rm.hdd.close();
+            OsLogger.close();
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void callResourceManager(){
         for(MIKOSProcess p : processes){
@@ -74,11 +103,12 @@ public class Rm {
         for(MIKOSProcess p : processes){
             if(p.ID.equals("ProcessManager")){
                 p.doProcess(null);
+                return;
             }
         }
     }
 
-    public static void start(String programName) {
+    /*public static void start(String programName) {
         Vm vmDescriptor = getVmDescriptor(programName);
         if (vmDescriptor == null) {
             //System.out.println("No such program");
@@ -126,7 +156,7 @@ public class Rm {
             column = indexes[1];
             test(vm);
         }
-    }
+    }*/
 
     public static long findFilePos(String programName) {
         byte[] word = new byte[5];
@@ -342,12 +372,12 @@ public class Rm {
         }
     }
 
-    public static void showCseg(String programName){
-        memory.showCodeSegment(programName);
+    public static void showCseg(int id){
+        memory.showCodeSegment(id);
     }
 
-    public static void showDseg(String programName){
-        memory.showDataSegment(programName);
+    public static void showDseg(int id){
+        memory.showDataSegment(id);
     }
 
     public static Vm getVmDescriptor(int id){
@@ -437,7 +467,7 @@ public class Rm {
         return ret;
     }
 
-    private static byte[] getCommand(Vm vm, int row, int col){
+    public static byte[] getCommand(Vm vm, int row, int col){
         byte[] ret;
         byte[][] rmPtrTable = memory.memory[ptr.getDataInt()];
         byte[][] vmPtrTable = memory.memory[Utils.bytesToInt(rmPtrTable[vm.ptr.getDataInt()])];
@@ -446,7 +476,7 @@ public class Rm {
         return ret;
     }
 
-    private static int[] getNextIndexes(Vm vm){
+    public static int[] getNextIndexes(Vm vm){
         int temp = Utils.bytesToInt(vm.cs.data) + vm.ic;
         int[] ret = new int[2];
         ret[0] = temp / 16;// row
@@ -454,7 +484,7 @@ public class Rm {
         return ret;
     }
 
-    private static boolean executeCommand(Vm vm, byte[] command){// returns false if command is HALT
+    public static boolean executeCommand(Vm vm, byte[] command){// returns false if command is HALT
         String cmd = new String(command);
         switch(cmd){
             case "ADRR":
@@ -560,7 +590,7 @@ public class Rm {
         return false;
     }
 
-    private static void showRegister(Vm vm){
+    public static void showRegister(Vm vm){
         int numOfSpaces = 11;
         byte[][] realTable = memory.memory[ptr.getDataInt()];
         int vmPtr = Utils.bytesToInt(realTable[vm.ptr.getDataInt()]);
@@ -576,7 +606,7 @@ public class Rm {
                 timer,
                 vm.ic));
     }
-    private static void test(Vm vm){
+    public static InterruptType test(Vm vm){
         if(si.type != InterruptType.NO_INTERRUPT){
             System.out.println("System interrupt");
         }
@@ -586,31 +616,38 @@ public class Rm {
         if(timer <= 0){
             System.out.println("Timer interupt");
             timer = 10;
+            return InterruptType.TIMER_INTERRUPT;
         }
         if(si.type == InterruptType.DUPLICATE_NAME){
             System.out.println("Interrupt: Duplicate name");
             OsLogger.writeToLog("Interrupt: Duplicate name");
+            return InterruptType.DUPLICATE_NAME;
         }
         if(si.type == InterruptType.INCORRECT_FILE_NAME){
             System.out.println("Interrupt: Incorrect file name");
             OsLogger.writeToLog("Interrupt: Incorrect file name");
+            return  InterruptType.INCORRECT_FILE_NAME;
         }
         if(si.type == InterruptType.OUT_OF_MEMORY){
             System.out.println("Interrupt: Out of memory");
             OsLogger.writeToLog("Interrupt: Out of memory");
             // TODO: remove vm
+            return InterruptType.OUT_OF_MEMORY;
         }
         if(si.type == InterruptType.UNDEFINED_OPERATION_WHILE_LOADING){
             System.out.println("Interrupt: Undefined operation while loading");
             OsLogger.writeToLog("Interrupt: Undefined operation while loading");
             // TODO: remove vm
+            return InterruptType.UNDEFINED_OPERATION_WHILE_LOADING;
         }
         if(pi.type == InterruptType.INCORRECT_FILE_HANLDE){
             System.out.println("Interrupt: Incorrect file handle");
             OsLogger.writeToLog("Interrupt: Incorrect file handle");
+            return InterruptType.INCORRECT_FILE_HANLDE;
         }
         si.type = InterruptType.NO_INTERRUPT;
         pi.type = InterruptType.NO_INTERRUPT;
+        return InterruptType.NO_INTERRUPT;
     }
 
     public static void setSI(InterruptType interupt){
@@ -623,6 +660,27 @@ public class Rm {
 
     private static boolean namesEqual(byte[] arr1, byte[] arr2){
         return arr1[0] == arr2[0] && arr1[1] == arr2[1];
+    }
+
+    public static void addResource(Type resourceType, String content, resources.State state){
+        Resource resource = new Resource();
+        resource.type = resourceType;
+        resource.content = content;
+        resource.state = state;
+        resourceList.add(resource);
+    }
+
+    public static Iterator<Resource> getResourceListIterator(){
+        return resourceList.iterator();
+    }
+
+    public static Vm getVm(int id){
+        for(Vm vm : VmList){
+            if(vm.id == id){
+                return vm;
+            }
+        }
+        return null;
     }
 
 }

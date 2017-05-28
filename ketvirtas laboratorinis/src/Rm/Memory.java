@@ -77,7 +77,7 @@ public class Memory {
         } else {
             ret = Constants.CSEG;
         }
-        for (i = i; i < words.length; i++) {
+        for (; i < words.length; i++) {
             vm.ic++;
             if (words[i].equals("DSEG")) {
                 memory[0][i] = "DSEG".getBytes();
@@ -218,9 +218,11 @@ public class Memory {
                     return false;
                 }else if (temp.value == Constants.DW) {
                     i++;
-                    int t = Utils.bytesToInt(memory[0][i]);
-                    if(t < 0 || t > 10000){
-                        return false;
+                    if(i < 16) {
+                        int t = Utils.bytesToInt(memory[0][i]);
+                        if (t < 0 || t > 10000) {
+                            return false;
+                        }
                     }
                 }else if(temp.value == Constants.DT) {
                     i++;
@@ -371,8 +373,8 @@ public class Memory {
         return ByteBuffer.wrap(memory[i][j]).getInt();
     }
 
-    public void showDataSegment(String programName){
-        Vm vmDescriptor = Rm.getVmDescriptor(programName);
+    public void showDataSegment(int id){
+        Vm vmDescriptor = Rm.getVm(id);
         if ( vmDescriptor != null ) {
             int ptrIndex = Utils.bytesToInt(vmDescriptor.ptr.data);
             //int dsIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);
@@ -431,8 +433,8 @@ public class Memory {
         }
     }
 
-    public void showCodeSegment(String programName) {
-        Vm vmDescriptor = Rm.getVmDescriptor(programName);
+    public void showCodeSegment(int id) {
+        Vm vmDescriptor = Rm.getVm(id);
         if ( vmDescriptor != null ) {
             int ptrIndex = Utils.bytesToInt(vmDescriptor.ptr.data);
             //int dsIndex = Utils.bytesToInt(vmDescriptor[Constants.VM_DS_INDEX]);

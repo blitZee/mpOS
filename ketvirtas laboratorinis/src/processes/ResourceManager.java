@@ -3,6 +3,8 @@ package processes;
 import Rm.Rm;
 import resources.Resource;
 import resources.Type;
+import utils.OsLogger;
+import vm.Vm;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,10 +24,11 @@ public class ResourceManager extends MIKOSProcess {
 
     @Override
     public void doProcess(Resource resource) {
+        //OsLogger.writeToLog("Resource manager started");
         STATE = State.RUNNING;
         MIKOSProcess process = null;
         ArrayList<MIKOSProcess> processes = new ArrayList<>();
-        Iterator<Resource> iter = Rm.resourceList.iterator();
+        Iterator<Resource> iter = Rm.getResourceListIterator();
         while(iter.hasNext()){
             Resource r = iter.next();
             if (r.type == Type.PAKROVIMO_PAKETAS){
@@ -39,6 +42,8 @@ public class ResourceManager extends MIKOSProcess {
                     process.RES.add(r);
                     process.STATE = State.READY;
                     iter.remove();// now we remove it from global scope
+                } else if(r.state == resources.State.FAILED_LOADING){
+                    iter.remove();
                 }
             } else if(r.type == Type.VARTOTOJO_ATMINTIS){
                 process = new JobGovernor();
@@ -46,9 +51,23 @@ public class ResourceManager extends MIKOSProcess {
                 process.RES.add(r);
                 process.STATE = State.READY;
                 iter.remove();
+            } else if(r.type == Type.PROGRAM_START){
+                process = findProcess("VM" + r.content);
+                process.RES.add(r);
+                process.STATE = State.READY;
+                iter.remove();
+            } else if(r.type == Type.PROGRAM_HALT){
+                iter.remove();
+                System.out.println("HALT in resource manager");
+            } else if(r.type == Type.VALIDATION){
+                process = findProcess("JCL");
+                process.RES.add(r);
+                process.STATE = State.READY;
+                iter.remove();
             }
         }
         STATE = State.BLOCKED;
+        //OsLogger.writeToLog("Resource manager ended\n");
     }
 
     private MIKOSProcess findProcess(String id){

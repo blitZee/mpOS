@@ -21,6 +21,7 @@ public class OsLogger {
                 log.write(msg);
                 log.newLine();
                 log.flush();
+                System.out.println(msg);
             } catch (IOException e) {
                 System.out.println("Unable to write to file");
             }

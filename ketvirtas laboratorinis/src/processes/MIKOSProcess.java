@@ -9,7 +9,7 @@ import java.util.ArrayList;
 /**
  * Created by blitZ on 4/7/2017.
  */
-public abstract class MIKOSProcess {
+public abstract class MIKOSProcess implements Comparable<MIKOSProcess>{
     public String ID;
     int PID;
     int PPID;
@@ -29,4 +29,9 @@ public abstract class MIKOSProcess {
     public int IC;
 
     public abstract void doProcess(Resource resource);
+
+    @Override
+    public int compareTo(MIKOSProcess other){
+        return other.priority - priority;
+    }
 }
