@@ -1,6 +1,7 @@
 package utils;
 
 import Rm.Rm;
+import processes.MIKOSProcess;
 
 import java.nio.ByteBuffer;
 
@@ -33,5 +34,12 @@ public class Utils {
     public static String intToString(int i){
         String s = "00000" + i;
         return s.substring(s.length() - 4);
+    }
+    public static MIKOSProcess findProcess(String id){
+        for(MIKOSProcess p : Rm.processes){
+            if(p.ID.equals(id))
+                return p;
+        }
+        return null;
     }
 }

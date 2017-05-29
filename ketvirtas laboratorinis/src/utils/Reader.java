@@ -1,6 +1,8 @@
 package utils;
 
 import Rm.Rm;
+import processes.MIKOSProcess;
+import resources.Resource;
 import resources.Type;
 
 import java.io.IOException;
@@ -16,9 +18,10 @@ public class Reader implements Runnable {
         boolean work = true;
         System.out.println("Hello. Welcome to MikOS. Type \"help\" to view the command list");
 
-            while (work) {
-                scanner.nextLine();
-                synchronized (Rm.class) {
+        while (work) {
+            scanner.nextLine();
+            synchronized (Rm.class) {
+                System.out.print(">>");
                 String input = scanner.nextLine();
                 String[] inArray = input.split(" ");
                 System.out.println(inArray[0]);
@@ -46,21 +49,25 @@ public class Reader implements Runnable {
                         break;
                     }
                     case "start": {
-                        String programName = programName(inArray);
-                        if (programName != null && programName.length() == 2) {
-                            //Rm.start(programName);
+                        int id = programId(inArray);
+                        if (id < 0) {
+                            System.out.println("Incorrect id");
                         } else {
-                            System.out.println("No program name given or incorrect format");
+                            Rm.addResource(Type.PROGRAM_START, "" + id, null);
                         }
                         break;
                     }
-                    case "clear": {
+                    case "kill": {
                         int id = programId(inArray);
                         if (id < 0) {
                             System.out.println("Incorrect Id");
                             break;
                         } else {
-                            Rm.removeVm(id);
+                            MIKOSProcess process = Utils.findProcess("ProcessKiller");
+                            Resource r = new Resource();
+                            r.content = "" + id;
+                            process.RES.add(r);
+                            Rm.addResource(Type.PROGRAM_KILL, "", null);
                         }
                         break;
                     }
@@ -99,11 +106,12 @@ public class Reader implements Runnable {
         }
 
     }
+
     private static void printHelp() {
         System.out.println("• Help - Prints this message;");
         System.out.println("• Load - Loads a program from HDD to real memory -p - Program name (up to 2 characters; Must be unique)");
-        System.out.println("• Start - Starts a program. -p - Program name");
-        System.out.println("• Clear - Clears a loaded program. -p - Program name.");
+        System.out.println("• Start - Starts a program. -p - id");
+        System.out.println("• Kill - Kills a loaded program. -p - program id.");
         System.out.println("• Show - Shows programs memory. -p - Program name.");
         System.out.println("• Showcs - Shows programs code segment. -p - Program name.");
         System.out.println("• Step - Set programs to execute in step mode. -p - Program name.");
@@ -122,7 +130,7 @@ public class Reader implements Runnable {
     private static String programName(String[] array) {
         for (int i = 1; i < array.length; i++) {
             if (array[i].equals("-p")) {
-                if(array.length > i + 1)
+                if (array.length > i + 1)
                     return array[i + 1];
             }
         }
@@ -132,7 +140,7 @@ public class Reader implements Runnable {
     private static int programId(String[] array) {
         for (int i = 1; i < array.length; i++) {
             if (array[i].equals("-p")) {
-                if(array.length > i + 1)
+                if (array.length > i + 1)
                     return Integer.parseInt(array[i + 1]);
             }
         }

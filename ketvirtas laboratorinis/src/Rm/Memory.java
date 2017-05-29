@@ -340,6 +340,8 @@ public class Memory {
                     return true;
                 case "FD00":
                     return true;
+                case "READ":
+                    return true;
             }
         } else {
             switch (cmd) {
@@ -374,6 +376,7 @@ public class Memory {
     }
 
     public void showDataSegment(int id){
+        boolean stop = false;
         Vm vmDescriptor = Rm.getVm(id);
         if ( vmDescriptor != null ) {
             int ptrIndex = Utils.bytesToInt(vmDescriptor.ptr.data);
@@ -423,9 +426,12 @@ public class Memory {
                                 System.out.print("0000" + " ");
                                 j++;
                             }
+                            stop = true;
                             break;
                         }
                     }
+                    if(stop)
+                        break;
                     System.out.println();
                 }
 

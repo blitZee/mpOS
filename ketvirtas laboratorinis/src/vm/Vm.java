@@ -1,11 +1,14 @@
 package vm;
 
 import Rm.InterruptType;
+import resources.Type;
 import testTools.Constants;
 import utils.Utils;
 import utils.OsLogger;
 import Rm.*;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * Created by irmis on 2017.03.15.
@@ -44,16 +47,6 @@ public class Vm {
         id = counter++;
     }
 
-    /*public Vm(byte[][] descriptor){
-        this();
-        ptr.data = descriptor[Constants.VM_PTR_INDEX];
-        sp.data = descriptor[Constants.VM_SP_INDEX];
-        ds.data = descriptor[Constants.VM_DS_INDEX];
-        cs.data = descriptor[Constants.VM_CS_INDEX];
-        r1.data = descriptor[Constants.VM_R1_INDEX];
-        r2.data = descriptor[Constants.VM_R2_INDEX];
-    }*/
-
     public void adrr() {
         StringBuilder sb = new StringBuilder();
         long temp, temp2;
@@ -72,8 +65,8 @@ public class Vm {
 
         sb.append("; result: " + temp);
 
-        if (temp > Integer.MAX_VALUE) {
-            temp -= Integer.MAX_VALUE;
+        if (temp > 9999) {
+            temp -= 9999;
             sf.setCf(1);
         }
         buffer = ByteBuffer.allocate(4);
@@ -107,8 +100,8 @@ public class Vm {
 
         sb.append("; result: " + temp);
 
-        if (temp > Integer.MAX_VALUE) {
-            temp -= Integer.MAX_VALUE;
+        if (temp > 9999) {
+            temp -= 9999;
             sf.setCf(1);
         }
         buffer = ByteBuffer.allocate(4);
@@ -137,7 +130,7 @@ public class Vm {
 
         sb.append("; result: " + temp);
         if (temp < 0) {
-            temp += Integer.MAX_VALUE;
+            temp += 9999;
             sf.setCf(1);
         }
         buffer = ByteBuffer.allocate(4);
@@ -169,7 +162,7 @@ public class Vm {
         sb.append(temp2);
         sb.append("; result: " + temp);
         if (temp < 0) {
-            temp += Integer.MAX_VALUE;
+            temp += 9999;
             sf.setCf(1);
         }
         buffer = ByteBuffer.allocate(4);
@@ -198,8 +191,8 @@ public class Vm {
         temp = temp * temp2;
 
         sb.append("; result: " + temp);
-        if (temp > Integer.MAX_VALUE) {
-            temp = temp - (Integer.MAX_VALUE * (temp / Integer.MAX_VALUE));
+        if (temp > 9999) {
+            temp = temp - (9999 * (temp / 9999));
             sf.setCf(1);
         }
         buffer = ByteBuffer.allocate(4);
@@ -231,8 +224,8 @@ public class Vm {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (temp > Integer.MAX_VALUE) {
-            temp = temp - (Integer.MAX_VALUE * (temp / Integer.MAX_VALUE));
+        if (temp > 9999) {
+            temp = temp - (9999 * (temp / 9999));
             sf.setCf(1);
         }
         buffer = ByteBuffer.allocate(4);
@@ -453,7 +446,7 @@ public class Vm {
     }
 
     public void lw(int x, int y) {
-        StringBuilder sb = new StringBuilder();
+        /*StringBuilder sb = new StringBuilder();
         int temp = 0;
         ByteBuffer buffer = null;
         try {
@@ -463,21 +456,25 @@ public class Vm {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        r1.data = Utils.intToBytes(temp, 4);
+        r1.data = Utils.intToBytes(temp, 4);*/
 
-        OsLogger.writeToLog("LW" + x + " " + y + "; " + sb);
+        Rm.setPI(InterruptType.GET_PUT_DATA);
+        Rm.addResource(Type.WRITE_WORD, x + " " + y + " " + this.id, null);
+        OsLogger.writeToLog("LW " + x + " " + y);
     }
 
     public void sw(int x, int y) {
-        StringBuilder sb = new StringBuilder();
+        /*StringBuilder sb = new StringBuilder();
         sb.append("register: " + r1.getDataInt() + " or " + new String(r1.data));
         try {
             saveData(x, y);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
-        OsLogger.writeToLog("SW" + x + " " + y + "; " + sb);
+        Rm.setPI(InterruptType.GET_PUT_DATA);
+        Rm.addResource(Type.READ_WORD, x + " " + y + " " + this.id, null);
+        OsLogger.writeToLog("SW " + x + " " + y);
     }
 
     public void mov1() {
@@ -495,7 +492,7 @@ public class Vm {
     }
 
     public void prnt() {
-        StringBuilder sb = new StringBuilder();
+        /*StringBuilder sb = new StringBuilder();
         ByteBuffer buffer = null;
         byte[] bytes = null;
         try {
@@ -514,25 +511,59 @@ public class Vm {
             }
             sb.append(bytes);
             System.out.println(new String(bytes));
-        }
+        }*/
 
-        OsLogger.writeToLog("PRNT: " + sb);
+        Rm.setPI(InterruptType.READ_WRITE);
+        Rm.addResource(Type.NEED_OUTPUT, "nonNumber " + this.id, null);
+        OsLogger.writeToLog("PRNT");
     }
 
     public void prns() {
-        System.out.println(r1.getDataInt());
-
+        //System.out.println(r1.getDataInt());
+        Rm.setPI(InterruptType.READ_WRITE);
+        Rm.addResource(Type.NEED_OUTPUT, "number " + this.id, null);
         OsLogger.writeToLog("PRNS: " + r1.getDataInt());
     }
 
-    public void push() {
-
+    public void read(){
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine();
+       // String[] words = getWords(input);
+        String[] words = input.split("(?<=\\G.{4})");
+        byte[] val = r1.data;
+        int pos = r1.getDataInt();
+        ByteBuffer byteBuffer  = null;
+        for(int i = 0; i < words.length; i++) {
+            byteBuffer = ByteBuffer.allocate(4).wrap(words[i].getBytes());
+            int posX = pos / 16;
+            int posY = pos % 16;
+            r1.data = byteBuffer.array();
+            try {
+                saveData(posX, posY);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            pos++;
+        }
+        r1.data = val;
     }
-
-    public void pop() {
-
+    private String[] getWords(String line){
+        ArrayList<String> words = new ArrayList<>();
+        for(int i = 0; i < line.length(); i++){
+            words.add("");
+            for(; i % 4 < 4; i++){
+                if(line.length() <= i){
+                    break;
+                }
+                words.set(i / 4, words.get(i / 4).concat("" + line.charAt(i)));
+            }
+        }
+        String[] words2 = new String[words.size()];
+        for(int i = 0; i < words.size(); i++){
+            words2[i] = words.get(i);
+        }
+        return words2;
     }
-
     public void jm(int x, int y) {
         ic = 16 * x + y;
 
@@ -563,29 +594,36 @@ public class Vm {
         OsLogger.writeToLog("JL" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic);
     }
     public void fo(int x, int y) {
-        int pos = Rm.getFilePos(x, y, true);
+        /*int pos = Rm.getFilePos(x, y, true);
         if(pos >= 0 && pos < 255)
             r1.data = Utils.intToBytes(pos, 4);
         else
             Rm.setPI(InterruptType.INCORRECT_FILE_NAME);
-
-        OsLogger.writeToLog("FO; handler: " + r1.getDataInt());
+        */
+        Rm.setPI(InterruptType.READ_WRITE);
+        Rm.addResource(Type.OPEN_FILE, x + " " + y  + " " + this.id, null);
+        OsLogger.writeToLog("FO " + (char)x + (char)y);
     }
 
     public void fc() {
-        Rm.closeFile(r1.data);
+        /*Rm.closeFile(r1.data);
         if(r1.getDataInt() < 0){
             Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
-        }
+        }*/
+        Rm.setPI(InterruptType.READ_WRITE);
+        Rm.addResource(Type.CLOSE_FILE, r1.getDataInt() + " " + this.id, null);
         OsLogger.writeToLog("FC; handler: " + r1.getDataInt());
     }
 
     public void fd() {
-        OsLogger.writeToLog("FD; handler: " + r1.getDataInt());
+        /*OsLogger.writeToLog("FD; handler: " + r1.getDataInt());
         if(r1.getDataInt() < 0){
             Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
         } else
-            Rm.deleteFile(r1.data);
+            Rm.deleteFile(r1.data);*/
+        Rm.setPI(InterruptType.READ_WRITE);
+        Rm.addResource(Type.DELETE_FILE, r1.getDataInt() + " " + this.id, null);
+        OsLogger.writeToLog("FD; handler: " + r1.getDataInt());
     }
 
     public void fr(int x, int y) {
@@ -593,22 +631,24 @@ public class Vm {
         if(r1.getDataInt() < 0){
             Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
         } else {
-            r2.data = Rm.fileRead(r1.data);
+            Rm.setPI(InterruptType.READ_WRITE);
+            Rm.addResource(Type.READ_FILE, r1.getDataInt() + " " + this.id, null);
+            /*r2.data = Rm.fileRead(r1.data);
             byte[] temp = {0, 0, r1.data[0], r1.data[1]};
             int temp2 = Utils.bytesToInt(temp);
             temp2++;
             temp = Utils.intToBytes(temp2, 4);
             r1.data[0] = temp[2];
-            r1.data[1] = temp[3];
+            r1.data[1] = temp[3];*/
         }
 
-        OsLogger.writeToLog("FR" + x + ", " + y + "; handler: " + r1.getDataInt());
+        OsLogger.writeToLog("FR " + x + ", " + y);
     }
 
     public void fw(int x, int y) {
         if(r1.getDataInt() < 0){
             Rm.setPI(InterruptType.INCORRECT_FILE_HANLDE);
-        } else {
+        } /*else {
             try {
                 //byte[] data = getData(x, y);
                 byte[] data = r2.data;
@@ -628,8 +668,12 @@ public class Vm {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }*/
+        else {
+            Rm.setPI(InterruptType.READ_WRITE);
+            Rm.addResource(Type.WRITE_FILE, r1.getDataInt() + " " + this.id, null);
         }
-        OsLogger.writeToLog("FW" + x + ", " + y + "; handler: " + r1.getDataInt());
+        OsLogger.writeToLog("FW " + x + ", " + y);
     }
 
     public void halt() {
@@ -638,7 +682,7 @@ public class Vm {
         ic = 0;
     }
 
-    private byte[] getData(int x, int y) throws Exception {
+    public byte[] getData(int x, int y) throws Exception {
         byte[][] rmPtrTable = Rm.memory.memory[Rm.ptr.getDataInt()];
         byte[][] vmPtrTable = Rm.memory.memory[Utils.bytesToInt(rmPtrTable[ptr.getDataInt()])];
         byte[][] temp;
@@ -652,7 +696,7 @@ public class Vm {
         return temp[y];
     }
 
-    private void saveData(int x, int y) throws Exception {
+    public void saveData(int x, int y) throws Exception {
         byte[][] rmPtrTable = Rm.memory.memory[Rm.ptr.getDataInt()];
         byte[][] vmPtrTable = Rm.memory.memory[Utils.bytesToInt(rmPtrTable[ptr.getDataInt()])];
         int pos = (x * 16 + y) * 2;

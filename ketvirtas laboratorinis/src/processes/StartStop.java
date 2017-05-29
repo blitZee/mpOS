@@ -24,6 +24,11 @@ public class StartStop extends MIKOSProcess {
         Rm.processes.add(new ResourceManager());
         Rm.processes.add(new Loader());
         Rm.processes.add(new JCL());
+        Rm.processes.add(new ProcessKiller());
+        Rm.processes.add(new Chan_1_Device());
+        Rm.processes.add(new Chan_3_Device());
+        Rm.processes.add(new Chan_2_Device());
+        Rm.processes.add(new GetPutData());
         STATE = State.BLOCKED;
     }
 }

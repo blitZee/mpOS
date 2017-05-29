@@ -78,6 +78,12 @@ public class VM extends MIKOSProcess {
                 Rm.addResource(Type.PROGRAM_START, vm.id + "", null);
                 break;
             }
+            if(interrupt == InterruptType.READ_WRITE){
+                break;
+            }
+            if(interrupt == InterruptType.GET_PUT_DATA){
+                break;
+            }
             if (!cont) {
                 Rm.timer = 10;
                 vm.ic = 0;
