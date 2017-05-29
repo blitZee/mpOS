@@ -25,7 +25,7 @@ public class VM extends MIKOSProcess {
 
     @Override
     public void doProcess(Resource resource) {
-        OsLogger.writeToLog("VM started, vm's id: " + resource.content);
+        OsLogger.writeToLog("VM started, vm's id: " + resource.content, OsLogger.LEVEL_3);
         STATE = State.RUNNING;
         Vm vmDescriptor = Rm.getVm(Integer.parseInt(resource.content));
         RES.remove(resource);
@@ -98,7 +98,7 @@ public class VM extends MIKOSProcess {
 
         }
         STATE = State.BLOCKED;
-        OsLogger.writeToLog("VM ended\n");
+        OsLogger.writeToLog("VM ended\n", OsLogger.LEVEL_3);
     }
 
     private int[] getCodeBeginning(Vm vm){

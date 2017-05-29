@@ -1,24 +1,68 @@
+Start stop started
+Start stop ended
 Job governor started
 Job governor ended
 
 Loader started
+JCL started
+JCL ended
 Loader ended. loaded vm's id is 0
 
 Job governor started
 Job governor ended
 
 VM started, vm's id: 0
-LW 0 1
-Interrupt: get put data
+HALT
+HALT
 VM ended
 
-Get put data started
-Get put data ended
-VM started, vm's id: 0
-MOV1; r1: 1; r2: 1
-PRNT
-Interrupt: Read/write
+Job governor started
+Job governor ended
+
+Loader started
+JCL started
+JCL ended
+Loader ended. loaded vm's id is 1
+
+Job governor started
+Job governor ended
+
+VM started, vm's id: 1
+HALT
+HALT
 VM ended
 
-Channel 3 device started
-Channel 3 device ended
+Job governor started
+Job governor ended
+
+Loader started
+JCL started
+JCL ended
+Loader ended. loaded vm's id is 2
+
+Job governor started
+Job governor ended
+
+VM started, vm's id: 2
+HALT
+HALT
+VM ended
+
+Process killer started
+Process killer ended
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program
+No such program

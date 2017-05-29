@@ -2,6 +2,7 @@ package processes;
 
 import Rm.Rm;
 import resources.Resource;
+import testTools.Constants;
 import utils.OsLogger;
 
 /**
@@ -20,13 +21,13 @@ public class ProcessKiller extends MIKOSProcess {
     @Override
     public void doProcess(Resource resource) {
         STATE = State.RUNNING;
-        OsLogger.writeToLog("Process killer started");
+        OsLogger.writeToLog("Process killer started", Constants.PROCESS_LOG_LEVEL);
         for(Resource r : RES){
             int temp = Integer.parseInt(r.content);
             Rm.removeVm(temp);
         }
         RES.clear();
         STATE = State.BLOCKED;
-        OsLogger.writeToLog("Process killer ended");
+        OsLogger.writeToLog("Process killer ended", Constants.PROCESS_LOG_LEVEL);
     }
 }

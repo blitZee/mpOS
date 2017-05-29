@@ -15,7 +15,7 @@ public abstract class MIKOSProcess implements Comparable<MIKOSProcess>{
     int PPID;
     public ArrayList<Resource> RES = new ArrayList<>();
     int CRES;
-    int priority;
+    public int priority;
 
     State STATE;
 

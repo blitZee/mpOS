@@ -140,8 +140,10 @@ public class Memory {
         int vmPageTablePtr = Utils.bytesToInt(vm.ptr.data);
         byte[][] vmPageTable = memory[Utils.bytesToInt(memory[rmPageTablePtr][vmPageTablePtr])];
         int freeBlock = getFreeBlock();
-        if(freeBlock == Constants.NO_MEMORY)
+        if(freeBlock == Constants.NO_MEMORY) {
+            System.out.println("NO MEMORY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             return Constants.NO_MEMORY;
+        }
         vmPageTable[vm.ptr.blocksUsed] = Utils.intToBytes(freeBlock, 4);
         copyBlock(memory[0], memory[freeBlock]);
         vm.ptr.blocksUsed++;

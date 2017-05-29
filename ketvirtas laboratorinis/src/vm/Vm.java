@@ -14,6 +14,9 @@ import java.util.Scanner;
  * Created by irmis on 2017.03.15.
  */
 public class Vm {
+    private int defaultLogLevel = OsLogger.LEVEL_2;
+
+
     private static int counter = 0;
     public int id;
 
@@ -76,7 +79,7 @@ public class Vm {
             sf.setZf(1);
         }
 
-        OsLogger.writeToLog("ADRR; " + sb);
+        OsLogger.writeToLog("ADRR; " + sb, defaultLogLevel);
     }
 
     public void ad(int x, int y) {
@@ -110,7 +113,7 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
-        OsLogger.writeToLog("AD " + x + " " + y + "; " + sb);
+        OsLogger.writeToLog("AD " + x + " " + y + "; " + sb, defaultLogLevel);
     }
 
     public void sbrr() {
@@ -139,7 +142,7 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
-        OsLogger.writeToLog("SBRR; " + sb);
+        OsLogger.writeToLog("SBRR; " + sb, defaultLogLevel);
     }
 
     public void sb(int x, int y) {
@@ -171,7 +174,7 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
-        OsLogger.writeToLog("SB" + x + " " + y  + "; " + sb);
+        OsLogger.writeToLog("SB" + x + " " + y  + "; " + sb, defaultLogLevel);
     }
 
     public void mlrr() {
@@ -201,7 +204,7 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
-        OsLogger.writeToLog("MLRR; " + sb);
+        OsLogger.writeToLog("MLRR; " + sb, defaultLogLevel);
     }
 
     public void ml(int x, int y) {
@@ -234,7 +237,7 @@ public class Vm {
         if (temp == 0) {
             sf.setZf(1);
         }
-        OsLogger.writeToLog("ML" + x + " " + y + "; " + sb);
+        OsLogger.writeToLog("ML" + x + " " + y + "; " + sb, defaultLogLevel);
 
     }
 
@@ -275,7 +278,7 @@ public class Vm {
             }
         }
 
-        OsLogger.writeToLog("DVRR; " + sb);
+        OsLogger.writeToLog("DVRR; " + sb, defaultLogLevel);
     }
 
     public void dv(int x, int y){
@@ -316,7 +319,7 @@ public class Vm {
             }
         }
 
-        OsLogger.writeToLog("DV" + x + " " + y + "; " + sb);
+        OsLogger.writeToLog("DV" + x + " " + y + "; " + sb, defaultLogLevel);
 
     }
 
@@ -343,7 +346,7 @@ public class Vm {
             sf.setZf(1);
         }
 
-        OsLogger.writeToLog("AND: " + sb);
+        OsLogger.writeToLog("AND: " + sb, defaultLogLevel);
     }
 
     public void or() {
@@ -367,7 +370,7 @@ public class Vm {
             sf.setZf(1);
         }
 
-        OsLogger.writeToLog("OS: " + sb);
+        OsLogger.writeToLog("OS: " + sb, defaultLogLevel);
     }
 
     public void xor() {
@@ -391,7 +394,7 @@ public class Vm {
             sf.setZf(1);
         }
 
-        OsLogger.writeToLog("XOR: " + sb);
+        OsLogger.writeToLog("XOR: " + sb, defaultLogLevel);
     }
 
     public void not() {
@@ -409,7 +412,7 @@ public class Vm {
             sf.setZf(1);
         }
 
-        OsLogger.writeToLog("NOT; " + sb);
+        OsLogger.writeToLog("NOT; " + sb, defaultLogLevel);
     }
 
     public void cmp() {
@@ -443,6 +446,7 @@ public class Vm {
 
             sf.setZf(1);
         }
+        OsLogger.writeToLog("CMP; " + sb, defaultLogLevel);
     }
 
     public void lw(int x, int y) {
@@ -460,7 +464,7 @@ public class Vm {
 
         Rm.setPI(InterruptType.GET_PUT_DATA);
         Rm.addResource(Type.WRITE_WORD, x + " " + y + " " + this.id, null);
-        OsLogger.writeToLog("LW " + x + " " + y);
+        OsLogger.writeToLog("LW " + x + " " + y, defaultLogLevel);
     }
 
     public void sw(int x, int y) {
@@ -474,21 +478,21 @@ public class Vm {
 
         Rm.setPI(InterruptType.GET_PUT_DATA);
         Rm.addResource(Type.READ_WORD, x + " " + y + " " + this.id, null);
-        OsLogger.writeToLog("SW " + x + " " + y);
+        OsLogger.writeToLog("SW " + x + " " + y, defaultLogLevel);
     }
 
     public void mov1() {
         ByteBuffer buffer = ByteBuffer.wrap(r1.data);
         r2.data = buffer.array();
 
-        OsLogger.writeToLog("MOV1; " + "r1: " + r1.getDataInt() + "; r2: " + r2.getDataInt());
+        OsLogger.writeToLog("MOV1; " + "r1: " + r1.getDataInt() + "; r2: " + r2.getDataInt(), defaultLogLevel);
     }
 
     public void mov2() {
         ByteBuffer buffer = ByteBuffer.wrap(r2.data);
         r1.data = buffer.array();
 
-        OsLogger.writeToLog("MOV1; " + "r1: " + r1.getDataInt() + "; r2: " + r2.getDataInt());
+        OsLogger.writeToLog("MOV1; " + "r1: " + r1.getDataInt() + "; r2: " + r2.getDataInt(), defaultLogLevel);
     }
 
     public void prnt() {
@@ -515,18 +519,18 @@ public class Vm {
 
         Rm.setPI(InterruptType.READ_WRITE);
         Rm.addResource(Type.NEED_OUTPUT, "nonNumber " + this.id, null);
-        OsLogger.writeToLog("PRNT");
+        OsLogger.writeToLog("PRNT", defaultLogLevel);
     }
 
     public void prns() {
         //System.out.println(r1.getDataInt());
         Rm.setPI(InterruptType.READ_WRITE);
         Rm.addResource(Type.NEED_OUTPUT, "number " + this.id, null);
-        OsLogger.writeToLog("PRNS: " + r1.getDataInt());
+        OsLogger.writeToLog("PRNS: " + r1.getDataInt(), defaultLogLevel);
     }
 
     public void read(){
-        Scanner scanner = new Scanner(System.in);
+        /*Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
        // String[] words = getWords(input);
         String[] words = input.split("(?<=\\G.{4})");
@@ -545,9 +549,13 @@ public class Vm {
             }
             pos++;
         }
-        r1.data = val;
+        r1.data = val;*/
+        Rm.setPI(InterruptType.READ_WRITE);
+        Rm.addResource(Type.NEED_INPUT, "" + this.id, null);
+        OsLogger.writeToLog("PRNS: " + r1.getDataInt(), defaultLogLevel);
+
     }
-    private String[] getWords(String line){
+   /* private String[] getWords(String line){
         ArrayList<String> words = new ArrayList<>();
         for(int i = 0; i < line.length(); i++){
             words.add("");
@@ -563,11 +571,11 @@ public class Vm {
             words2[i] = words.get(i);
         }
         return words2;
-    }
+    }*/
     public void jm(int x, int y) {
         ic = 16 * x + y;
 
-        OsLogger.writeToLog("JM" + x + " " + y + "; ic: " + ic);
+        OsLogger.writeToLog("JM" + x + " " + y + "; ic: " + ic, defaultLogLevel);
     }
 
     public void je(int x, int y) {
@@ -575,7 +583,7 @@ public class Vm {
         if(sf.getZf()){
             ic = 16 * x + y;
         }
-        OsLogger.writeToLog("JE" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic);
+        OsLogger.writeToLog("JE" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic, defaultLogLevel);
     }
 
     public void ja(int x, int y) {
@@ -583,7 +591,7 @@ public class Vm {
         if(!sf.getCf() && !sf.getZf()){
             ic = 16 * x + y;
         }
-        OsLogger.writeToLog("JA" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic);
+        OsLogger.writeToLog("JA" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic, defaultLogLevel);
     }
 
     public void jl(int x, int y) {
@@ -591,7 +599,7 @@ public class Vm {
         if(sf.getCf()){
             ic = 16 * x + y;
         }
-        OsLogger.writeToLog("JL" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic);
+        OsLogger.writeToLog("JL" + x + " " + y + "; old ic: " + oldIc + ", new ic: " + ic, defaultLogLevel);
     }
     public void fo(int x, int y) {
         /*int pos = Rm.getFilePos(x, y, true);
@@ -602,7 +610,7 @@ public class Vm {
         */
         Rm.setPI(InterruptType.READ_WRITE);
         Rm.addResource(Type.OPEN_FILE, x + " " + y  + " " + this.id, null);
-        OsLogger.writeToLog("FO " + (char)x + (char)y);
+        OsLogger.writeToLog("FO " + (char)x + (char)y, defaultLogLevel);
     }
 
     public void fc() {
@@ -612,7 +620,7 @@ public class Vm {
         }*/
         Rm.setPI(InterruptType.READ_WRITE);
         Rm.addResource(Type.CLOSE_FILE, r1.getDataInt() + " " + this.id, null);
-        OsLogger.writeToLog("FC; handler: " + r1.getDataInt());
+        OsLogger.writeToLog("FC; handler: " + r1.getDataInt(), defaultLogLevel);
     }
 
     public void fd() {
@@ -623,7 +631,7 @@ public class Vm {
             Rm.deleteFile(r1.data);*/
         Rm.setPI(InterruptType.READ_WRITE);
         Rm.addResource(Type.DELETE_FILE, r1.getDataInt() + " " + this.id, null);
-        OsLogger.writeToLog("FD; handler: " + r1.getDataInt());
+        OsLogger.writeToLog("FD; handler: " + r1.getDataInt(), defaultLogLevel);
     }
 
     public void fr(int x, int y) {
@@ -642,7 +650,7 @@ public class Vm {
             r1.data[1] = temp[3];*/
         }
 
-        OsLogger.writeToLog("FR " + x + ", " + y);
+        OsLogger.writeToLog("FR " + x + ", " + y, defaultLogLevel);
     }
 
     public void fw(int x, int y) {
@@ -673,12 +681,13 @@ public class Vm {
             Rm.setPI(InterruptType.READ_WRITE);
             Rm.addResource(Type.WRITE_FILE, r1.getDataInt() + " " + this.id, null);
         }
-        OsLogger.writeToLog("FW " + x + ", " + y);
+        OsLogger.writeToLog("FW " + x + ", " + y, defaultLogLevel);
     }
 
     public void halt() {
         //System.out.println("HALT");
-        OsLogger.writeToLog("HALT");
+        OsLogger.writeToLog("HALT", defaultLogLevel);
+        OsLogger.writeToLog("HALT", defaultLogLevel);
         ic = 0;
     }
 

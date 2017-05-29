@@ -4,6 +4,7 @@ import Rm.Rm;
 import Rm.InterruptType;
 import resources.Resource;
 import resources.Type;
+import testTools.Constants;
 import utils.OsLogger;
 import vm.Vm;
 
@@ -25,7 +26,7 @@ public class Chan_3_Device extends MIKOSProcess {
     @Override
     public void doProcess(Resource resource) {
         STATE = State.RUNNING;
-        OsLogger.writeToLog("Channel 3 device started");
+        OsLogger.writeToLog("Channel 3 device started", Constants.PROCESS_LOG_LEVEL);
         resource = RES.get(0);
         String[] arguments = resource.content.split(" ");
         Vm vm = Rm.getVmDescriptor(Integer.parseInt(arguments[1]));
@@ -50,17 +51,20 @@ public class Chan_3_Device extends MIKOSProcess {
                 try {
                     bytes = vm.getData((vm.r1.getDataInt() + i)/16, (vm.r1.getDataInt() + i)%16);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    OsLogger.writeToLog("Somethings wrong with register values", OsLogger.LEVEL_3);
+                    break;
+                    //e.printStackTrace();
                 }
-                sb.append(bytes);
-                System.out.println(new String(bytes));
+                if(bytes != null) {
+                    sb.append(bytes);
+                    System.out.println(new String(bytes));
+                }
             }
         }
-
-
-
-
+        Rm.addResource(Type.PROGRAM_START, arguments[1], null);
+        Rm.setPI(InterruptType.NO_INTERRUPT);
+        RES.remove(resource);
         STATE = State.BLOCKED;
-        OsLogger.writeToLog("Channel 3 device ended");
+        OsLogger.writeToLog("Channel 3 device ended", Constants.PROCESS_LOG_LEVEL);
     }
 }

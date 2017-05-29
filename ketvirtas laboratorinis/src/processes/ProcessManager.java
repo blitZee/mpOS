@@ -23,7 +23,7 @@ public class ProcessManager extends MIKOSProcess {
 
     @Override
     public void doProcess(Resource resource) {
-        //OsLogger.writeToLog("Process manager started");
+        OsLogger.writeToLog("Process manager started", OsLogger.LEVEL_1);
         for(MIKOSProcess process : Rm.processes){
             if(process.STATE == State.READY){
                 process.doProcess(process.RES.get(0));
@@ -44,6 +44,6 @@ public class ProcessManager extends MIKOSProcess {
         }
         Rm.processesToRemove.clear();
         Collections.sort(Rm.processes);
-        //OsLogger.writeToLog("Process manager ended\n");
+        OsLogger.writeToLog("Process manager ended\n", OsLogger.LEVEL_1);
     }
 }

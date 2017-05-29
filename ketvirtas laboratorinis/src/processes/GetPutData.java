@@ -4,6 +4,7 @@ import Rm.Rm;
 import Rm.InterruptType;
 import resources.Resource;
 import resources.Type;
+import testTools.Constants;
 import utils.OsLogger;
 import utils.Utils;
 import vm.Vm;
@@ -26,7 +27,7 @@ public class GetPutData extends MIKOSProcess {
     @Override
     public void doProcess(Resource resource) {
         STATE = State.RUNNING;
-        OsLogger.writeToLog("Get put data started");
+        OsLogger.writeToLog("Get put data started", Constants.PROCESS_LOG_LEVEL);
         resource = RES.get(0);
         String[] arguments = resource.content.split(" ");
         Vm vm = Rm.getVmDescriptor(Integer.parseInt(arguments[2]));
@@ -69,6 +70,6 @@ public class GetPutData extends MIKOSProcess {
 
 
         STATE = State.BLOCKED;
-        OsLogger.writeToLog("Get put data ended");
+        OsLogger.writeToLog("Get put data ended", Constants.PROCESS_LOG_LEVEL);
     }
 }

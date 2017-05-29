@@ -3,6 +3,7 @@ package processes;
 import Rm.Rm;
 import resources.Resource;
 import resources.Type;
+import utils.OsLogger;
 import utils.Utils;
 import vm.Vm;
 
@@ -24,7 +25,7 @@ public class ResourceManager extends MIKOSProcess {
 
     @Override
     public void doProcess(Resource resource) {
-        //OsLogger.writeToLog("Resource manager started");
+        OsLogger.writeToLog("Resource manager started", OsLogger.LEVEL_1);
         STATE = State.RUNNING;
         MIKOSProcess process = null;
         ArrayList<MIKOSProcess> processes = new ArrayList<>();
@@ -58,7 +59,7 @@ public class ResourceManager extends MIKOSProcess {
                 iter.remove();
             } else if(r.type == Type.PROGRAM_HALT){
                 iter.remove();
-                System.out.println("HALT in resource manager");
+                //System.out.println("HALT in resource manager");
             } else if(r.type == Type.VALIDATION){
                 process = Utils.findProcess("JCL");
                 process.RES.add(r);
@@ -145,7 +146,7 @@ public class ResourceManager extends MIKOSProcess {
             }
         }
         STATE = State.BLOCKED;
-        //OsLogger.writeToLog("Resource manager ended\n");
+        OsLogger.writeToLog("Resource manager ended\n", OsLogger.LEVEL_1);
     }
 
 }

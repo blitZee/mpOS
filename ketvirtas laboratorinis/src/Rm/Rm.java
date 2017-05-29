@@ -358,15 +358,19 @@ public class Rm implements Runnable{
         return vmPtr;
     }
 
-    public static void showBlock(String programName) {
+    public static void showBlock(int programName) {
         Vm vmDescriptor = null;
         for(int i = 0; i < 16; i++){
             //vmDescriptor = memory.memory[Utils.bytesToInt(vmListTable[i])];
             vmDescriptor = getVmDescriptor(programName);
-            if(vmDescriptor.name.equals(programName))
-            {
-                byte[][] rmTable = memory.memory[Utils.bytesToInt(Rm.ptr.data)];
-                memory.showTrackMemory(ByteBuffer.wrap(rmTable[i]).getInt());
+            if(vmDescriptor != null) {
+                if (vmDescriptor.id == programName) {
+                    byte[][] rmTable = memory.memory[Utils.bytesToInt(Rm.ptr.data)];
+                    memory.showTrackMemory(ByteBuffer.wrap(rmTable[i]).getInt());
+                    break;
+                }
+            } else{
+                OsLogger.writeToLog("No such program", OsLogger.LEVEL_3);
                 break;
             }
         }
@@ -612,43 +616,43 @@ public class Rm implements Runnable{
         }
         if(timer <= 0){
             //System.out.println("Timer interupt");
-            OsLogger.writeToLog("Interrupt: timer");
+            OsLogger.writeToLog("Interrupt: timer", OsLogger.LEVEL_3);
             timer = 10;
             return InterruptType.TIMER_INTERRUPT;
         }
         if(si.type == InterruptType.DUPLICATE_NAME){
             //System.out.println("Interrupt: Duplicate name");
-            OsLogger.writeToLog("Interrupt: Duplicate name");
+            OsLogger.writeToLog("Interrupt: Duplicate name",OsLogger.LEVEL_3);
             return InterruptType.DUPLICATE_NAME;
         }
         if(si.type == InterruptType.INCORRECT_FILE_NAME){
             //System.out.println("Interrupt: Incorrect file name");
-            OsLogger.writeToLog("Interrupt: Incorrect file name");
+            OsLogger.writeToLog("Interrupt: Incorrect file name",OsLogger.LEVEL_3);
             return  InterruptType.INCORRECT_FILE_NAME;
         }
         if(si.type == InterruptType.OUT_OF_MEMORY){
             //System.out.println("Interrupt: Out of memory");
-            OsLogger.writeToLog("Interrupt: Out of memory");
+            OsLogger.writeToLog("Interrupt: Out of memory",OsLogger.LEVEL_3);
             // TODO: remove vm
             return InterruptType.OUT_OF_MEMORY;
         }
         if(si.type == InterruptType.UNDEFINED_OPERATION_WHILE_LOADING){
            // System.out.println("Interrupt: Undefined operation while loading");
-            OsLogger.writeToLog("Interrupt: Undefined operation while loading");
+            OsLogger.writeToLog("Interrupt: Undefined operation while loading", OsLogger.LEVEL_3);
             // TODO: remove vm
             return InterruptType.UNDEFINED_OPERATION_WHILE_LOADING;
         }
         if(pi.type == InterruptType.INCORRECT_FILE_HANLDE){
             //System.out.println("Interrupt: Incorrect file handle");
-            OsLogger.writeToLog("Interrupt: Incorrect file handle");
+            OsLogger.writeToLog("Interrupt: Incorrect file handle", OsLogger.LEVEL_3);
             return InterruptType.INCORRECT_FILE_HANLDE;
         }
         if(pi.type == InterruptType.READ_WRITE){
-            OsLogger.writeToLog("Interrupt: Read/write");
+            OsLogger.writeToLog("Interrupt: Read/write", OsLogger.LEVEL_3);
             return InterruptType.READ_WRITE;
         }
         if(pi.type == InterruptType.GET_PUT_DATA){
-            OsLogger.writeToLog("Interrupt: get put data");
+            OsLogger.writeToLog("Interrupt: get put data", OsLogger.LEVEL_3);
             return  InterruptType.GET_PUT_DATA;
         }
         si.type = InterruptType.NO_INTERRUPT;

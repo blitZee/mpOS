@@ -3,6 +3,7 @@ package processes;
 import Rm.Rm;
 import resources.Resource;
 import resources.Type;
+import testTools.Constants;
 import utils.OsLogger;
 
 /**
@@ -21,13 +22,13 @@ public class JobGovernor extends MIKOSProcess {
 
     @Override
     public void doProcess(Resource resource) {
-        OsLogger.writeToLog("Job governor started");
+        OsLogger.writeToLog("Job governor started", Constants.PROCESS_LOG_LEVEL);
         STATE = State.RUNNING;
         Resource r = getResource();
         if(resource.type == Type.VARTOTOJO_ATMINTIS){
             Rm.addResource(Type.PAKROVIMO_PAKETAS, RES.get(0).content, resources.State.ALIVE);
             RES.remove(RES.get(0));
-            OsLogger.writeToLog("Job governor ended\n");
+            OsLogger.writeToLog("Job governor ended\n", Constants.PROCESS_LOG_LEVEL);
             return;
         }
 
@@ -41,7 +42,7 @@ public class JobGovernor extends MIKOSProcess {
 
         System.out.println("job governor process state: " + inProcess + "; vm id: " + r.content);
         STATE = State.BLOCKED;
-        OsLogger.writeToLog("Job governor ended\n");
+        OsLogger.writeToLog("Job governor ended\n", Constants.PROCESS_LOG_LEVEL);
     }
 
     private Resource getResource(){

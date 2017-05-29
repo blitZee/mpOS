@@ -26,7 +26,7 @@ public class Loader extends MIKOSProcess {
 
     @Override
     public void doProcess(Resource resource) {
-        OsLogger.writeToLog("Loader started");
+        OsLogger.writeToLog("Loader started", OsLogger.LEVEL_3);
         STATE = State.RUNNING;
         RES.remove(resource);
         String programName = resource.content;
@@ -37,6 +37,12 @@ public class Loader extends MIKOSProcess {
         }*/
         int ret = 0;
         int vmPtr = Rm.getVmPtr();// assign space in rm ptr. Value can be from 0 to 15
+        if(vmPtr < 0){
+            OsLogger.writeToLog("Not enough space to add vm, ending loader", OsLogger.LEVEL_3);
+            resource.state = resources.State.FAILED_LOADING;
+            STATE = State.BLOCKED;
+            return;
+        }
         MIKOSProcess process = findProcess("JCL");
         process.doProcess(resource);
         if(resource.state == null || resource.state != resources.State.VALIDATED) {
@@ -52,7 +58,7 @@ public class Loader extends MIKOSProcess {
             long pos = Rm.findFilePos(programName);
             if(pos < 0) {
                 Rm.setSI(InterruptType.INCORRECT_FILE_NAME);
-                OsLogger.writeToLog("No program named " + programName);
+                OsLogger.writeToLog("No program named " + programName, OsLogger.LEVEL_3);
                 return;
             }
             while (true) {
@@ -63,7 +69,7 @@ public class Loader extends MIKOSProcess {
                 else if(ret == Constants.NO_MEMORY){
                     Rm.setSI(InterruptType.OUT_OF_MEMORY);
                     //System.out.println("No memory");
-                    OsLogger.writeToLog("No memory for vm, named " + programName);
+                    OsLogger.writeToLog("No memory for vm, named " + programName, OsLogger.LEVEL_3);
                     Rm.removeVm(vm);
                 }
             }
@@ -73,8 +79,8 @@ public class Loader extends MIKOSProcess {
             resource.state = resources.State.FAILED_LOADING;
         } catch (Exception e) {
             Rm.setPI(InterruptType.UNDEFINED_OPERATION_WHILE_LOADING);
-            Rm.removeVm(vm);// TODO: This needs to be processed in interrupt
-            OsLogger.writeToLog("Removed vm named " + programName + ", because of incorrect code");
+            //Rm.removeVm(vm);// TODO: This needs to be processed in interrupt
+            OsLogger.writeToLog("Removed vm named " + programName + ", because of incorrect code", OsLogger.LEVEL_3);
             resource.state = resources.State.FAILED_LOADING;
             return;
         }
@@ -88,7 +94,7 @@ public class Loader extends MIKOSProcess {
         resource.content = "" + vm.id;
         resource.state = resources.State.WAITING_FOR_USAGE;
         STATE = State.BLOCKED;
-        OsLogger.writeToLog("Loader ended. loaded vm's id is " + vm.id + "\n");
+        OsLogger.writeToLog("Loader ended. loaded vm's id is " + vm.id + "\n", OsLogger.LEVEL_3);
     }
 
     private MIKOSProcess findProcess(String id){

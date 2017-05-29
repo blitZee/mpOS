@@ -5,7 +5,6 @@ import processes.MIKOSProcess;
 import resources.Resource;
 import resources.Type;
 
-import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -41,9 +40,6 @@ public class Reader implements Runnable {
                         }
                         break;
                     }
-                    case "save": {
-                        throw new UnsupportedOperationException();
-                    }
                     case "help": {
                         printHelp();
                         break;
@@ -72,9 +68,9 @@ public class Reader implements Runnable {
                         break;
                     }
                     case "show": {
-                        String programName = programName(inArray);
-                        if (programName != null)
-                            Rm.showBlock(programName);
+                        int id = programId(inArray);
+                        if (id >= 0)
+                            Rm.showBlock(id);
                         else {
                             System.out.println("No program name given");
                         }
@@ -100,6 +96,24 @@ public class Reader implements Runnable {
                     }
                     case "step": {
                         Rm.stepMode = true;
+                        break;
+                    }
+                    case "nostep": {
+                        Rm.stepMode = false;
+                        break;
+                    }
+                    case "change":{
+                        try {
+                            MIKOSProcess p = Utils.findProcess(inArray[1]);
+                            if (p == null) {
+                                System.out.println("no such process");
+                            } else {
+                                p.priority = Integer.parseInt(inArray[2]);
+                            }
+                        } catch(Exception e){
+                            System.out.println("Incorrect command");
+                        }
+                        break;
                     }
                 }
             }
@@ -117,6 +131,9 @@ public class Reader implements Runnable {
         System.out.println("• Step - Set programs to execute in step mode. -p - Program name.");
         System.out.println("• Nostep - Set programs to execute in non step mode. -p - Program name.");
         System.out.println("• Quit - Shuts down the OS");
+        System.out.println("• Change <process name> <new priority> - changes priority of process. Possible processes to change: " +
+                "ResourceManager; ProcessManager; Loader; JCL; ProcessKiller; Chan_1_Device; Chan_2_Device; " +
+                "Chan_3_Device; GetPutData; Interrupt");
     }
 
     private static String fileName(String[] array) {

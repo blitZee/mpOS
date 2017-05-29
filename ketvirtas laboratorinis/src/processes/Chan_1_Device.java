@@ -4,6 +4,7 @@ import Rm.Rm;
 import Rm.InterruptType;
 import resources.Resource;
 import resources.Type;
+import testTools.Constants;
 import utils.OsLogger;
 import utils.Utils;
 import vm.Vm;
@@ -24,7 +25,7 @@ public class Chan_1_Device extends MIKOSProcess {
     @Override
     public void doProcess(Resource resource) {
         STATE = State.RUNNING;
-        OsLogger.writeToLog("Channel one device started");
+        OsLogger.writeToLog("Channel one device started", Constants.PROCESS_LOG_LEVEL);
         resource = RES.get(0);
         if(resource.type == Type.OPEN_FILE){
             String[] arguments = resource.content.split(" ");
@@ -101,6 +102,6 @@ public class Chan_1_Device extends MIKOSProcess {
 
 
         STATE = State.BLOCKED;
-        OsLogger.writeToLog("Channel one device ended");
+        OsLogger.writeToLog("Channel one device ended", Constants.PROCESS_LOG_LEVEL);
     }
 }
