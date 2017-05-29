@@ -12,7 +12,9 @@ public class Constants {
     public final static int DW = 3;
     public final static int DT = 4;
 
-    public final static int PROCESS_LOG_LEVEL = OsLogger.LEVEL_3;
+    public final static int PROCESS_LOG_LEVEL = OsLogger.LEVEL_2;
 
     public final static int NO_MEMORY = -1;
+
+    public final static int MAX_ITERATIONS = 10000;
 }

@@ -4,6 +4,7 @@ import Rm.Rm;
 import Rm.InterruptType;
 import resources.Resource;
 import resources.Type;
+import testTools.Constants;
 import utils.OsLogger;
 import utils.Utils;
 import vm.Vm;
@@ -72,6 +73,7 @@ public class VM extends MIKOSProcess {
             }
             cont = Rm.executeCommand(vm, command);
             vm.ic++;
+            vm.iterations++;
             Rm.timer--;
             InterruptType interrupt =  Rm.test(vm);
             if(interrupt == InterruptType.TIMER_INTERRUPT){
@@ -84,9 +86,10 @@ public class VM extends MIKOSProcess {
             if(interrupt == InterruptType.GET_PUT_DATA){
                 break;
             }
-            if (!cont) {
+            if (!cont || vm.iterations > Constants.MAX_ITERATIONS) {
                 Rm.timer = 10;
                 vm.ic = 0;
+                vm.iterations = 0;
                 Rm.addResource(Type.PROGRAM_HALT, "" + vm.id, null);
                 //Rm.processes.remove(this);
                 Rm.processesToRemove.add(this);

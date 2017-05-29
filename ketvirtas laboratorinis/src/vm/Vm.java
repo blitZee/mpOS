@@ -2,13 +2,10 @@ package vm;
 
 import Rm.InterruptType;
 import resources.Type;
-import testTools.Constants;
 import utils.Utils;
 import utils.OsLogger;
 import Rm.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  * Created by irmis on 2017.03.15.
@@ -19,6 +16,7 @@ public class Vm {
 
     private static int counter = 0;
     public int id;
+    public int iterations;
 
     public VmRegister ptr;
     public VmRegister r1;
@@ -48,6 +46,7 @@ public class Vm {
         ic = 0;
         name = programName;
         id = counter++;
+        iterations = 0;
     }
 
     public void adrr() {
